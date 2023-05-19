@@ -1,0 +1,46 @@
+[gd_scene load_steps=4 format=3 uid="uid://c3gmvsf0m4rmf"]
+
+[ext_resource type="Script" path="res://scenes/game/HandCard.gd" id="1_ifl0j"]
+[ext_resource type="Texture2D" uid="uid://d1bcexwv2wa5a" path="res://assets/cards/units/GenshinImpact_GeoHypostasis.png" id="2_i1n76"]
+[ext_resource type="Texture2D" uid="uid://dou3pktufwtax" path="res://assets/cards/Misc/lockedSymbol.png" id="3_mjc06"]
+
+[node name="HandCard" type="Node2D"]
+script = ExtResource("1_ifl0j")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("2_i1n76")
+
+[node name="Control" type="Control" parent="Sprite"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -421.0
+offset_top = -636.0
+offset_right = -421.0
+offset_bottom = -636.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LockedSign" type="ColorRect" parent="Sprite/Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.709804)
+
+[node name="LockedSymbol" type="Sprite2D" parent="Sprite/Control/LockedSign"]
+position = Vector2(423.5, 578.5)
+scale = Vector2(1.26807, 1.26807)
+texture = ExtResource("3_mjc06")
+
+[node name="CardBack" type="Sprite2D" parent="."]
+scale = Vector2(0.4, 0.4)
+
+[connection signal="gui_input" from="Sprite/Control" to="." method="_on_control_gui_input"]
+[connection signal="mouse_entered" from="Sprite/Control" to="." method="_on_control_mouse_entered"]
+[connection signal="mouse_exited" from="Sprite/Control" to="." method="_on_control_mouse_exited"]

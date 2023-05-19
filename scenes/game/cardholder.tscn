@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://b5gp3m13ntmfn"]
+
+[ext_resource type="Script" path="res://scenes/game/cardholder.gd" id="1_6pfrq"]
+[ext_resource type="Texture2D" uid="uid://bgkgid0p616qu" path="res://assets/cards/Misc/CardHolderGrey.png" id="2_ftuvf"]
+
+[node name="Cardholder" type="Node2D"]
+script = ExtResource("1_6pfrq")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+modulate = Color(1, 1, 1, 0.419608)
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("2_ftuvf")
+
+[node name="Control" type="Control" parent="Sprite"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -421.0
+offset_top = -636.0
+offset_right = -421.0
+offset_bottom = -636.0
+grow_horizontal = 2
+grow_vertical = 2

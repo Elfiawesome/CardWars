@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://dm8uf423g6xfk"]
+
+[ext_resource type="Script" path="res://scenes/main.gd" id="1_3sgov"]
+[ext_resource type="Script" path="res://scenes/DebugOverlay.gd" id="2_c2ygw"]
+
+[node name="Playspace" type="Node2D"]
+script = ExtResource("1_3sgov")
+
+[node name="Game" type="Node" parent="."]
+
+[node name="MainCamera" type="Camera2D" parent="."]
+z_index = 1
+
+[node name="Hand" type="Node2D" parent="MainCamera"]
+
+[node name="GUI" type="CanvasLayer" parent="MainCamera"]
+
+[node name="DebugOverlay" type="Label" parent="MainCamera/GUI"]
+offset_right = 1237.0
+offset_bottom = 706.0
+text = "DEBUG"
+script = ExtResource("2_c2ygw")

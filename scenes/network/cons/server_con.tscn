@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://bacokk5mnfksg"]
+
+[ext_resource type="Script" path="res://scenes/network/cons/server_con.gd" id="1_wy01v"]
+
+[node name="ServerCon" type="Node"]
+script = ExtResource("1_wy01v")
+
+[node name="ClientList" type="Label" parent="."]
+offset_right = 1280.0
+offset_bottom = 713.0
+autowrap_mode = 3
