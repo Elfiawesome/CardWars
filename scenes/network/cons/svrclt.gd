@@ -15,6 +15,8 @@ var GameSettings = {
 var Turn = 0
 var Turnstage = []
 var SelectedAttackingCards: Array[CardholderNode] = []
+var AnimationList = []
+var AnimationHandler:AnimationHandlerNode = preload("res://scenes/game/Animations/animation_handler.tscn").instantiate()
 
 func _instantiate_player():
 	var _plyr = load("res://scenes/game/player_con.tscn").instantiate()
@@ -40,7 +42,6 @@ func _return_player_data(PlayerNode: PlayerConNode):
 	dict["SpellDeck"] = PlayerNode.SpellDeck
 	dict["HeroID"] = PlayerNode.HeroID
 	return dict
-
 func get_local_con():
 	return socket_to_instanceid[mysocket]
 
@@ -114,6 +115,8 @@ func _SetupStartGame(_TeamCompo):
 	GGV.Playspace.CameraFocusNo = Turn
 	#Set game to go
 	GGV.IsGame = true
+	#Create all nessecary game stuff
+	add_child(AnimationHandler)
 func _update_turnstage():
 	Turnstage.clear()
 	for team in TeamComposition:
@@ -124,6 +127,33 @@ func IsMyTurn():
 		return true
 	else:
 		return false
+
+
+#Player Input Controls
+func _on_cardholder_pressed(Cardholder:CardholderNode):
+	if !GGV.IsGame:
+		return
+	var _con:PlayerConNode = socket_to_instanceid[Cardholder.mysocket]
+	if _con.Team == get_local_con().Team:#MY own cards
+		if Cardholder.CardID!=0 && GGV.GameStage == GGV.ATTACKINGTURN:
+			if SelectedAttackingCards.find(Cardholder)!=-1:
+				Cardholder.Attack_Selected=false
+				SelectedAttackingCards.erase(Cardholder)
+			else:
+				Cardholder.Attack_Selected=true
+				SelectedAttackingCards.push_back(Cardholder)
+	else:#Other teams
+		#Attacking other cardholders
+		if SelectedAttackingCards.size()>0:
+			print("Initiate attacking for the following")
+			var AnimationBlock = load("res://scenes/game/Animations/AnimationBlocks/Animation_AttackBasic.gd")
+			for SelectedCardholder in SelectedAttackingCards:
+				AnimationHandler.AddAnimationToQueue(AnimationBlock.new(),[SelectedCardholder,Cardholder])
+			#Remove selected cardholders
+			for SelectedCardholder in SelectedAttackingCards:
+				SelectedCardholder.Attack_Selected=false
+			SelectedAttackingCards.clear()
+
 
 func DebugDrawOverlay():
 	var _cardlist = ""

@@ -8,7 +8,6 @@ var CardPos=0
 var AnimationStage=0
 var PlacedOnCardholder: CardholderNode
 var ShowBack = true
-var flipspeed: float = 0.05
 var HomeCoord = Vector2()
 var HomeDepth = 0
 var TargetCoord = Vector2()
@@ -56,7 +55,9 @@ func _process(_delta):
 	var conShowHands=Playspace.ShowHands
 	var conSelectedCard=Playspace.SelectedCard
 	var showhandsoffset=150
-	var posspeed=0.07
+	var posspeed=7*_delta
+	var rotspeed=10*_delta
+	var flipspeed: float = 5*_delta
 	if conShowHands:
 		showhandsoffset=0
 	
@@ -75,7 +76,7 @@ func _process(_delta):
 			TargetRot = HomeRot
 			TargetScale.x -= flipspeed
 			position=lerp(position,TargetCoord*ZoomScale,posspeed)
-			rotation=lerp(rotation,TargetRot,0.1)
+			rotation=lerp(rotation,TargetRot,rotspeed)
 			scale=TargetScale*ZoomScale
 			if TargetScale.x<=0:
 				AnimationStage = 2
@@ -85,7 +86,7 @@ func _process(_delta):
 			TargetRot = HomeRot
 			TargetScale.x += flipspeed
 			position=lerp(position,TargetCoord*ZoomScale,posspeed)
-			rotation=lerp(rotation,TargetRot,0.1)
+			rotation=lerp(rotation,TargetRot,rotspeed)
 			scale=TargetScale*ZoomScale
 			if TargetScale.x>=1:
 				TargetScale.x = 1
@@ -114,15 +115,15 @@ func _process(_delta):
 					TargetCoord = get_viewport().get_camera_2d().get_local_mouse_position()/ZoomScale
 					TargetRot=deg_to_rad(-10)
 					TargetScale=Vector2(.5,.5)/ZoomScale
-					posspeed=0.5
+					posspeed=14*_delta
 				else:
 					TargetCoord.x = HomeCoord.x
 					TargetCoord.y = HomeCoord.y+showhandsoffset
 					TargetRot=HomeRot
 					TargetScale=Vector2(1,1)
 			position=lerp(position,TargetCoord*ZoomScale,posspeed)
-			rotation=lerp(rotation,TargetRot,0.1)
-			scale=lerp(scale,TargetScale*ZoomScale,0.2)
+			rotation=lerp(rotation,TargetRot,rotspeed)
+			scale=lerp(scale,TargetScale*ZoomScale,rotspeed*2)
 		4: #Placed down
 			if PlacedOnCardholder==null:
 				AnimationStage = 5

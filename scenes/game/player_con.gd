@@ -32,6 +32,7 @@ func _process(_delta):
 						NetworkClient.SendData([NetworkClient.TURNMOVEON,[]])
 
 func _CreateCardHolders(Isenemy):
+	var _holderload = load("res://scenes/game/cardholder.tscn")
 	var _Yoff=1
 	if Isenemy:
 		_Yoff=-1
@@ -48,9 +49,10 @@ func _CreateCardHolders(Isenemy):
 		)
 		if i == (totalcards-1):
 			midpos = Vector2(0,140*_Yoff)
-		var _holder = load("res://scenes/game/cardholder.tscn").instantiate()
+		var _holder = _holderload.instantiate()
 		add_child(_holder)
 		_holder.position = midpos
+		_holder.HomePos = midpos
 		_holder.Pos = i-1
 		_holder.mysocket = mysocket
 		Cardholderlist.push_back(_holder)

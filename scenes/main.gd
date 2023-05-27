@@ -37,7 +37,7 @@ func _process(_delta):
 		_arrangecardsbacktohand()
 	
 	#Manage camera drag & zoom
-	ManageCameraFocus()
+	ManageCameraFocus(_delta)
 	#Create server/Join Server
 	if GGV.NetworkCon == null:
 		if Input.is_action_just_pressed("ui_up"):#Create server
@@ -55,7 +55,7 @@ func _IsNothovercard(CardPos):
 	if HoveredCard==CardPos:
 		HoveredCard=-1
 func _addcardintohand(cardID,Type):
-		var card=load("res://scenes/game/HandCard.tscn").instantiate()
+		var card=preload("res://scenes/game/HandCard.tscn").instantiate()
 		card.CardID=cardID
 		card.CardType=Type
 		$MainCamera/Hand.add_child(card)
@@ -106,7 +106,7 @@ func _remove_specific_card(CardInfo):
 		NetworkClient.SendData([NetworkClient.REMOVECARDFROMHAND,dat])
 
 
-func ManageCameraFocus():
+func ManageCameraFocus(_delta):
 	if GGV.IsGame && GGV.NetworkCon.Turn<GGV.NetworkCon.Turnstage.size():
 		var _inst = GGV.NetworkCon.socket_to_instanceid[ GGV.NetworkCon.Turnstage[GGV.NetworkCon.Turn] ]
 		if GGV.NetworkCon.Turnstage[GGV.NetworkCon.Turn] == GGV.NetworkCon.mysocket:#If its my turn
@@ -131,7 +131,7 @@ func ManageCameraFocus():
 		get_viewport().get_camera_2d().position = lerp(
 			get_viewport().get_camera_2d().position , 
 			_inst.position + CameraOffset,
-			0.05 
+			5*_delta
 		)
 		get_viewport().get_camera_2d().position.x = clamp(get_viewport().get_camera_2d().position.x,MinCamOff.x,MaxCamOff.x)
 		get_viewport().get_camera_2d().position.y = clamp(get_viewport().get_camera_2d().position.y,MinCamOff.y,MaxCamOff.y)
@@ -144,8 +144,9 @@ func ManageCameraFocus():
 			CameraOffset.y = clamp(CameraOffsetStart.y - _myoff.y, MinCamOff.y - CameraFocus.position.y, MaxCamOff.y - CameraFocus.position.y)
 		if Input.is_action_just_released("drag"):
 			CameraIsDrag = false
-		get_viewport().get_camera_2d().zoom.x = lerp(get_viewport().get_camera_2d().zoom.x, Zoomfactor.x, 0.1)
-		get_viewport().get_camera_2d().zoom.y = lerp(get_viewport().get_camera_2d().zoom.y, Zoomfactor.y, 0.1)
+		get_viewport().get_camera_2d().zoom.x = lerp(get_viewport().get_camera_2d().zoom.x, Zoomfactor.x, 10*_delta)
+		get_viewport().get_camera_2d().zoom.y = lerp(get_viewport().get_camera_2d().zoom.y, Zoomfactor.y, 10*_delta)
+
 
 func _input(event):
 	if event is InputEventMouseButton:
