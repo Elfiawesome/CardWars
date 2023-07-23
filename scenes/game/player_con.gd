@@ -31,6 +31,8 @@ func _process(_delta):
 					else:
 						NetworkClient.SendData([NetworkClient.TURNMOVEON,[]])
 
+
+#Setup functions
 func _CreateCardHolders(Isenemy):
 	var _holderload = load("res://scenes/game/cardholder.tscn")
 	var _Yoff=1
@@ -59,10 +61,38 @@ func _CreateCardHolders(Isenemy):
 		i+=1
 func _SummonCard(CardID, Pos):
 	if Pos<Cardholderlist.size():
+		#Initialize identifier vars
 		var _inst = Cardholderlist[Pos]
+		_inst.Stats["UnitIdentifier"] = GGV.UnitIdentifier
+		GGV.UnitIdentifier+=1
 		_inst.CardID = CardID
-		_inst.Stats["Base_Hp"] = 0
-		_inst.Stats["Hp"] = 0
-		_inst.Stats["Base_Atk"] = 0
-		_inst.Stats["Atk"] = 0
-		_inst.Sprite.texture = load(UnitData.CardData[CardID]["Texture"])
+		#Base stats
+		_inst.Stats["Base_Hp"] = UnitData.CardData[CardID]["Hp"]
+		_inst.Stats["Hp"] = _inst.Stats["Base_Hp"]
+		_inst.Stats["Base_Atk"] = UnitData.CardData[CardID]["Atk"]
+		_inst.Stats["Atk"] = _inst.Stats["Base_Atk"]
+		#SP ATKS
+		if UnitData.CardData[CardID]["SpAtk"].has("CrossATK"):
+			_inst.Stats["CrossATK"].push_back(_inst.GetMultiStatID())
+		if UnitData.CardData[CardID]["SpAtk"].has("SpreadATK"):
+			_inst.Stats["SpreadATK"].push_back(_inst.GetMultiStatID())
+		if UnitData.CardData[CardID]["SpAtk"].has("SweepATK"):
+			_inst.Stats["SweepATK"].push_back(_inst.GetMultiStatID())
+		if UnitData.CardData[CardID]["SpAtk"].has("PierceATK"):
+			_inst.Stats["PierceATK"].push_back(_inst.GetMultiStatID())
+		if UnitData.CardData[CardID]["SpAtk"].has("SplashATK"):
+			_inst.Stats["SplashATK"].push_back(
+				{
+					_inst.GetMultiStatID():0
+				}
+			)
+		#Visual looks
+		_inst._update_actual_visual()
+		#_inst.Sprite.texture = load(UnitData.CardData[CardID]["Texture"])
+#is funcitons
+func BattlefieldSize():
+	var _size = 0
+	for _cardholder in Cardholderlist:
+		if !_cardholder.IsDead():
+			_size+=1
+	return _size

@@ -1,10 +1,8 @@
 extends Node
 class_name AbilityClass
 
-func _activate_ability():
+func _activate_ability0(_Cardholder:CardholderNode):
 	pass
-
 func _is_ability_available():
-	pass
-func _is_ability_target_valid():#For target abilities
-	pass
+	return true
+

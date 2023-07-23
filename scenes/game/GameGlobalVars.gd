@@ -9,3 +9,4 @@ enum{
 	PLAYERTURN
 }
 var HandCardIdentifier = 0
+var UnitIdentifier = 0

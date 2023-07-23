@@ -165,7 +165,6 @@ func IsCardHoveringCardholder():
 			if holder.IsMouseOverMe == true:
 				_r = holder
 				return _r
-				break
 
 func _on_control_mouse_entered():
 	if GGV.NetworkCon.IsMyTurn():

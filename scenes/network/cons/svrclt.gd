@@ -130,30 +130,58 @@ func IsMyTurn():
 
 
 #Player Input Controls
+#Why the fuck is input controls is in SCRCLT????????? client side stuff in here?
 func _on_cardholder_pressed(Cardholder:CardholderNode):
 	if !GGV.IsGame:
+		return
+	if mysocket != Turnstage[Turn]:
 		return
 	var _con:PlayerConNode = socket_to_instanceid[Cardholder.mysocket]
 	if _con.Team == get_local_con().Team:#MY own cards
 		if Cardholder.CardID!=0 && GGV.GameStage == GGV.ATTACKINGTURN:
 			if SelectedAttackingCards.find(Cardholder)!=-1:
-				Cardholder.Attack_Selected=false
+				Cardholder._attackdeselected()
 				SelectedAttackingCards.erase(Cardholder)
 			else:
-				Cardholder.Attack_Selected=true
-				SelectedAttackingCards.push_back(Cardholder)
+				if Cardholder.CanAttack():
+					Cardholder._attackselected()
+					SelectedAttackingCards.push_back(Cardholder)
 	else:#Other teams
 		#Attacking other cardholders
-		if SelectedAttackingCards.size()>0:
-			print("Initiate attacking for the following")
-			var AnimationBlock = load("res://scenes/game/Animations/AnimationBlocks/Animation_AttackBasic.gd")
+		if (SelectedAttackingCards.size()>0) && (Cardholder.CardID!=0):
+			#Create the attack map
+			var AttackMap = {}
+			AttackMap["Attackers"] = []
 			for SelectedCardholder in SelectedAttackingCards:
-				AnimationHandler.AddAnimationToQueue(AnimationBlock.new(),[SelectedCardholder,Cardholder])
+				AttackMap["Attackers"].push_back([SelectedCardholder.mysocket,SelectedCardholder.Pos])
+			AttackMap["Victim"] = [Cardholder.mysocket,Cardholder.Pos]
+			#Commit the attack
+			if GGV.NetworkCon.IsServer:
+				_svrAttackCardholder(0,[AttackMap])
+			else:
+				NetworkClient.SendData([NetworkServer.ATTACKCARDHOLDER,[AttackMap]])
+				_AttackCardholder([AttackMap])
 			#Remove selected cardholders
-			for SelectedCardholder in SelectedAttackingCards:
-				SelectedCardholder.Attack_Selected=false
-			SelectedAttackingCards.clear()
-
+			for SelectedCardholderIndex in range(SelectedAttackingCards.size()-1,-1,-1):
+				var SelectedCardholder: CardholderNode = SelectedAttackingCards[SelectedCardholderIndex]
+				if SelectedCardholder.Stats["AtkLeft"]<1:
+					SelectedCardholder._attackdeselected()
+					SelectedAttackingCards.remove_at(SelectedCardholderIndex)
+func _on_cardholder_hover(Cardholder:CardholderNode):
+	for SelectedCardholder in SelectedAttackingCards:
+		SelectedCardholder._hoveroncardholder(Cardholder)
+func IsAttackingCardValid(Attacker: CardholderNode,Victim:CardholderNode):
+	var _r = false
+	var AttackerCon:PlayerConNode = socket_to_instanceid[Attacker.mysocket]
+	var VictimCon:PlayerConNode = socket_to_instanceid[Victim.mysocket]
+	if Attacker.CardID==0 || Victim.CardID==0:
+		return false
+	if Victim.IsBackCard():
+		if VictimCon.BattlefieldSize()==1:
+			_r=true
+	else:
+		_r = true
+	return _r
 
 func DebugDrawOverlay():
 	var _cardlist = ""
@@ -164,7 +192,8 @@ func DebugDrawOverlay():
 	if GGV.GameStage == GGV.ATTACKINGTURN:
 		_strgamestage = "Attacking..."
 	GGV.Playspace.debug_overlay.text = (
-		str(socketlist) + 
+		str(socketlist) +
+		"\nFPS: " + str(Engine.get_frames_per_second()) +
 		"\nMysocket: " + str(mysocket) + ", T: "+ str(socket_to_instanceid[mysocket].Team) + 
 		"\nSettings: " + str(GameSettings) + 
 		"\nTeamCompo: " + str(TeamComposition) + 
@@ -173,6 +202,34 @@ func DebugDrawOverlay():
 		"\nCardIdentifier: "+str(GGV.HandCardIdentifier) + 
 		"\nSelectedHolders: "+str(SelectedAttackingCards)
 	)
+
+func _EndOfAttackingTurnChecks():
+	#Poison/Tick Damge
+	#AbilitiesCheck
+	for sock in socket_to_instanceid:
+		var _con:PlayerConNode = socket_to_instanceid[sock]
+		for cardholder in _con.Cardholderlist:
+			if cardholder.CardID!=0:
+				cardholder.Stats["Lifespan"]+=1
+				#Reset Attacks
+				cardholder.Stats["AtkLeft"] = cardholder.Stats["AtkMax"]
+				#Reset Abilities
+				#Reset ability here
+	for sock in socket_to_instanceid:
+		var _con:PlayerConNode = socket_to_instanceid[sock]
+		for cardholder in _con.Cardholderlist:
+			cardholder._activate_intrinsic_ability()
+	#SpellsCheck
+	#TimerRecution & Deaths
+	for sock in socket_to_instanceid:
+		var _con:PlayerConNode = socket_to_instanceid[sock]
+		for cardholder in _con.Cardholderlist:
+			if cardholder.CardID!=0:
+				#Death
+				if cardholder.Stats["Hp"]<1:
+					cardholder._death()
+					cardholder._update_actual_visual()
+	#Victory
 func _svrTurnMoveOn():
 	_TurnMoveOn()
 	for sock in socketlist:
@@ -194,8 +251,11 @@ func _TurnMoveOn():
 				#Run spells sys
 			GGV.ATTACKINGTURN:
 				#End of turn checks
+				_EndOfAttackingTurnChecks()
 				#Reimbursement
 				GGV.GameStage = GGV.PLAYERTURN
+
+
 func _svrSummonCard(buffer):
 	_SummonCard(buffer)
 	for sock in socketlist:
@@ -235,9 +295,29 @@ func _RemoveCardFromHand(buffer: Array):
 	var _con:PlayerConNode = socket_to_instanceid[mysock]
 	var _pos = _con.HandCards.find(handdata)
 	if _pos!=-1 and handpos == _pos:
-		print(_pos)
 		_con.HandCards.remove_at(_pos)
 		if mysock == mysocket:
 			GGV.Playspace.remove_card_from_hand(_pos)
 	
 
+func _svrAttackCardholder(socket, buffer: Array):
+	_AttackCardholder(buffer)
+	for sock in socketlist:
+		if sock!=socket:
+			NetworkServer.SendData(sock,[NetworkServer.ATTACKCARDHOLDER,buffer])
+func _AttackCardholder(buffer: Array):
+	var AttackingMap = buffer[0]
+	var AttackingList = AttackingMap["Attackers"]
+	var Victim = AttackingMap["Victim"]
+	var VictimObj = socket_to_instanceid[Victim[0]].Cardholderlist[Victim[1]]
+	var AnimationBlock = load("res://scenes/game/Animations/AnimationBlocks/Animation_AttackBasic.gd")
+	var AnimationSet:Array = []
+	for Attacker in AttackingList:
+		var AttackerObj:CardholderNode = socket_to_instanceid[Attacker[0]].Cardholderlist[Attacker[1]]
+		if IsAttackingCardValid(AttackerObj,VictimObj):
+			var VictimArray:Array = AttackerObj.GetVictimsArray(VictimObj)
+			for _victimObj in VictimArray: 
+				#Initiate attack here
+				AttackerObj._attack_cardholder(_victimObj)
+			#Animation handling
+			AnimationHandler.AddAnimationSingleToQueue(AnimationBlock.new(),[AttackerObj,VictimArray])

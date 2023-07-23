@@ -86,6 +86,8 @@ func _Server_Player_ReceiveData(socket, message):
 			_svrAddCardIntoHand(buffer)
 		NetworkServer.REMOVECARDFROMHAND:
 			_svrRemoveCardFromHand(buffer)
+		NetworkServer.ATTACKCARDHOLDER:
+			_svrAttackCardholder(socket,buffer)
 func _process(_delta):
 	if mysocket!=-1:
 		DebugDrawOverlay()

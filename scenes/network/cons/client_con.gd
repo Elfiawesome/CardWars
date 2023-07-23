@@ -73,6 +73,8 @@ func _Client_Player_ReceiveData(message):
 			_AddCardIntoHand(buffer)
 		NetworkClient.REMOVECARDFROMHAND:
 			_RemoveCardFromHand(buffer)
+		NetworkClient.ATTACKCARDHOLDER:
+			_AttackCardholder(buffer)
 func _process(_delta):
 	if mysocket!=-1:
 		DebugDrawOverlay()
