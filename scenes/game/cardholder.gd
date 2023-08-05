@@ -9,6 +9,11 @@ var Attack_Selected = false
 var Ability_Selected = false
 var originalscale = 0.2
 var TimerCount: float = 0
+enum DamageType{
+	DefaultDamage=1,
+	SplashDamage,
+	CritDamage
+}
 #Other client side stuff
 @onready var Sprite = $Sprite
 @onready var Collision = $Sprite/Control
@@ -29,8 +34,8 @@ var AbilityStats = [
 
 # stuff need fixing:
 # when selected a card, and it dies, then the card would still be selected
-# 
-
+# When card is hovering over other cards, isualize so that we know we are attacking that one
+# Damage Numbers goofy looking
 func _ready():
 	Sprite.texture = DefaultCardholder
 	_clear()
@@ -46,7 +51,7 @@ func _process(_delta):
 		CurveLine.StartClr = Color.DARK_RED
 		CurveLine.EndClr = Color.RED
 		if IsOtherCardholderHovered!=null:
-			if GGV.NetworkCon.IsAttackingCardValid(self,IsOtherCardholderHovered):
+			if IsAttackValid(IsOtherCardholderHovered):
 				if IsOtherCardholderHovered.mysocket != mysocket:
 					CurveLine.EndPos = IsOtherCardholderHovered._realpos() - _realpos()
 					CurveLine.StartClr = Color.DARK_GREEN
@@ -57,14 +62,13 @@ func _process(_delta):
 	#Animate Shake
 	if ShakeAmt>0:
 		position = ShakePos+Vector2(randf_range(-ShakeAmt,ShakeAmt),randf_range(-ShakeAmt,ShakeAmt))
-		ShakeAmt-=0.5
+		ShakeAmt-=0.5*_delta*25
 		if ShakeAmt<0:
 			ShakeAmt = 0
 			ShakePos = position
 	else:
 		ShakePos = position
-		#ShakeAmt=lerp(ShakeAmt,0.0,10*_delta)
-		
+	
 	#move timer by 1
 	TimerCount+=1
 
@@ -83,6 +87,8 @@ func _Is_Mouse_Over_Me():
 			GGV.NetworkCon._on_cardholder_hover(self)
 func _hoveroncardholder(HoveredCardholder:CardholderNode):
 	IsOtherCardholderHovered = HoveredCardholder
+
+
 func _update_actual_visual():
 	if CardID!=0:
 		$HpBox/HP.text=str(Stats["Hp"])
@@ -106,10 +112,20 @@ func _realpos() -> Vector2:
 #Then all the animation should be backlogged by somekind of array of sorts
 #Any animation can run even tho the card is technically dead
 
-func _attack_cardholder(Victim:CardholderNode):
+func _attack_cardholder(Victim:CardholderNode, damagetype):
+	#Determine damage
+	var dmg = Stats["Atk"]
+	if damagetype==DamageType.SplashDamage:
+		for splashattack in Stats["SplashATK"]:
+			if splashattack[1] > dmg:
+				dmg = splashattack[1]
+	#Reduce attacks
 	Stats["AtkLeft"]-=1
-	Victim.Stats["Hp"] -= Stats["Atk"]
+	#Do damage
+	Victim.Stats["Hp"] -= dmg
 	Victim._update_actual_visual()
+	
+	return dmg
 func _clear():
 	CardID = 0
 	#Identifier Stats
@@ -183,10 +199,10 @@ func IsBackCard():
 func IsMiddleCard():
 	var _con:PlayerConNode = GGV.NetworkCon.socket_to_instanceid[mysocket]
 	var _r:bool = false
-	var midpoint:float = ((_con.Cardholderlist.size()-1)/2) - 1.0
+	var totalfrontrows:float = (_con.Cardholderlist.size()-2)
+	var midpoint:float = (totalfrontrows/2)
 	var floatpos:float = float(Pos)
-	print(midpoint)
-	if abs(midpoint - floatpos)<1.0:
+	if abs(midpoint - floatpos)<1:
 		_r=true
 	return _r
 func IsFrozen():
@@ -202,23 +218,49 @@ func HaveSPAtk(SpType:String):
 		if !Stats[SpType].is_empty():
 			have = true
 	return have
-func GetVictimsArray(Victim:CardholderNode):
+func IsAttackValid(Victim:CardholderNode):
+	var _r = false
+	var AttackerCon:PlayerConNode = GGV.NetworkCon.socket_to_instanceid[mysocket]
+	var VictimCon:PlayerConNode = GGV.NetworkCon.socket_to_instanceid[Victim.mysocket]
+	if CardID==0 || Victim.CardID==0:
+		return false
+	if Victim.IsBackCard():
+		if HaveSPAtk("CrossATK") || HaveSPAtk("SpreadATK") || HaveSPAtk("PierceATK"):
+			_r = true
+		if VictimCon.BattlefieldSize()==1:
+			_r = true
+	else:
+		_r = true
+	return _r
+func GetVictimsDamageArray(Victim:CardholderNode):
 	var attackingarray:Array[CardholderNode] = []
+	var damagearray:Array = []
 	var victcon:PlayerConNode = GGV.NetworkCon.socket_to_instanceid[Victim.mysocket]
+	
 	attackingarray.push_back(Victim)
+	damagearray.push_back(DamageType.DefaultDamage)
+	
 	if HaveSPAtk("SpreadATK"):
 		for _victims in victcon.Cardholderlist:
 			if !attackingarray.has(_victims):
 				attackingarray.push_back(_victims)
+				damagearray.push_back(DamageType.DefaultDamage)
 	if HaveSPAtk("SweepATK"):
 		for _victims in victcon.Cardholderlist:
 			if !_victims.IsBackCard():
 				if !attackingarray.has(_victims):
 					attackingarray.push_back(_victims)
+					damagearray.push_back(DamageType.DefaultDamage)
 	if HaveSPAtk("PierceATK"):
 		if Victim.IsMiddleCard() || Victim.IsBackCard():
 			for _victims in victcon.Cardholderlist:
 				if _victims.IsMiddleCard() || _victims.IsBackCard():
 					if !attackingarray.has(_victims):
 						attackingarray.push_back(_victims)
-	return attackingarray
+						damagearray.push_back(DamageType.DefaultDamage)
+	if HaveSPAtk("SplashATK"):
+		for _victims in victcon.Cardholderlist:
+			if !attackingarray.has(_victims):
+				attackingarray.push_back(_victims)
+				damagearray.push_back(DamageType.SplashDamage)
+	return [attackingarray,damagearray]

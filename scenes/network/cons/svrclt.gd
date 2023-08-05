@@ -170,18 +170,7 @@ func _on_cardholder_pressed(Cardholder:CardholderNode):
 func _on_cardholder_hover(Cardholder:CardholderNode):
 	for SelectedCardholder in SelectedAttackingCards:
 		SelectedCardholder._hoveroncardholder(Cardholder)
-func IsAttackingCardValid(Attacker: CardholderNode,Victim:CardholderNode):
-	var _r = false
-	var AttackerCon:PlayerConNode = socket_to_instanceid[Attacker.mysocket]
-	var VictimCon:PlayerConNode = socket_to_instanceid[Victim.mysocket]
-	if Attacker.CardID==0 || Victim.CardID==0:
-		return false
-	if Victim.IsBackCard():
-		if VictimCon.BattlefieldSize()==1:
-			_r=true
-	else:
-		_r = true
-	return _r
+
 
 func DebugDrawOverlay():
 	var _cardlist = ""
@@ -311,13 +300,18 @@ func _AttackCardholder(buffer: Array):
 	var Victim = AttackingMap["Victim"]
 	var VictimObj = socket_to_instanceid[Victim[0]].Cardholderlist[Victim[1]]
 	var AnimationBlock = load("res://scenes/game/Animations/AnimationBlocks/Animation_AttackBasic.gd")
-	var AnimationSet:Array = []
 	for Attacker in AttackingList:
 		var AttackerObj:CardholderNode = socket_to_instanceid[Attacker[0]].Cardholderlist[Attacker[1]]
-		if IsAttackingCardValid(AttackerObj,VictimObj):
-			var VictimArray:Array = AttackerObj.GetVictimsArray(VictimObj)
-			for _victimObj in VictimArray: 
+		if AttackerObj.IsAttackValid(VictimObj):
+			var VictimsDamageArray = AttackerObj.GetVictimsDamageArray(VictimObj)
+			var VictimArray:Array[CardholderNode] = VictimsDamageArray[0]
+			var DamageTypeArray:Array = VictimsDamageArray[1]
+			var DamageArray:Array = []
+			for i in VictimArray.size():
+				var _victimObj = VictimArray[i]
+				var _damagetype = DamageTypeArray[i]
 				#Initiate attack here
-				AttackerObj._attack_cardholder(_victimObj)
+				var dmg = AttackerObj._attack_cardholder(_victimObj,_damagetype)
+				DamageArray.append(dmg)
 			#Animation handling
-			AnimationHandler.AddAnimationSingleToQueue(AnimationBlock.new(),[AttackerObj,VictimArray])
+			AnimationHandler.AddAnimationSingleToQueue(AnimationBlock.new(),[AttackerObj,VictimArray,DamageArray])

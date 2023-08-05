@@ -7,7 +7,7 @@ func _animation_start(_args: Array):
 func _animation_playing(_delta, args:Array):
 	var Attacker:CardholderNode = args[0]
 	var Victimarr:Array[CardholderNode] = args[1]
-	#var Victim:CardholderNode = args[1]
+	var Dmgarr:Array = args[2]
 	var MoveSpd = 14*_delta
 	var lerptresh = 0.1*20
 	match AnimationStage:
@@ -22,8 +22,14 @@ func _animation_playing(_delta, args:Array):
 			Attacker.rotation = lerp(Attacker.rotation,tgtrot,MoveSpd)
 			if abs(Attacker.rotation - tgtrot)<0.1:
 				AnimationStage = 2
-				for _victim in Victimarr:
+				for i in Victimarr.size():
+					#Create shake to vicitm
+					var _victim = Victimarr[i]
 					_victim.ShakeAmt = 10
+					#Create damage numbers here also
+					var dmgNumobj:DamageNumberClass = load("res://scenes/game/visuals/damage_numbers.tscn").instantiate()
+					dmgNumobj.text = str(Dmgarr[i])
+					_victim.add_child(dmgNumobj)
 		2:#Rotate back
 			var tgtrot:float = 0
 			Attacker.rotation = lerp(Attacker.rotation,tgtrot,MoveSpd)

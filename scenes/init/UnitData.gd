@@ -39,6 +39,8 @@ func _ready():
 	CardData[FanFron_FantasticDragon]["SpAtk"]["PierceATK"]=true
 	
 	InitUnitCard(FanFron_ForestWalker,15,5,8,"Forest Walker","",lf+"FanFron_ForestWalker.png")
+	CardData[FanFron_ForestWalker]["SpAtk"]["SplashATK"]=10
+	
 func InitUnitCard(id,Hp: int,Atk: int,Pt: int,Name:String, AbilityDescription:String, texturepath:String):
 	CardData[id]={
 		"Name": Name,

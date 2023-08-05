@@ -82,9 +82,10 @@ func _SummonCard(CardID, Pos):
 			_inst.Stats["PierceATK"].push_back(_inst.GetMultiStatID())
 		if UnitData.CardData[CardID]["SpAtk"].has("SplashATK"):
 			_inst.Stats["SplashATK"].push_back(
-				{
-					_inst.GetMultiStatID():0
-				}
+				[
+					_inst.GetMultiStatID(),
+					UnitData.CardData[CardID]["SpAtk"]["SplashATK"]
+				]
 			)
 		#Visual looks
 		_inst._update_actual_visual()
