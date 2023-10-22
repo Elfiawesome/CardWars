@@ -40,7 +40,7 @@ func _ready():
 	_clear()
 
 func _process(_delta):
-	$DebugText.text=str(Stats["Ability"][0])
+	$DebugText.text=str(mysocket)
 	_Is_Mouse_Over_Me()
 	if Attack_Selected or Ability_Selected:
 		var _outersc:float = 0.01*sin(TimerCount * 10)
@@ -97,11 +97,12 @@ func _input(event):
 		if event.button_index == MOUSE_BUTTON_LEFT && event.is_pressed() && IsMouseOverMe:
 			GGV.NetworkCon._on_cardholder_pressed(self)
 	
-	if CardID==0:
+	if mysocket != GGV.NetworkCon.mysocket || CardID==0: # If its not my card
 		return
 	# Ability activating self
 	if event is InputEventKey:
 		if event.keycode == KEY_A && event.is_pressed() && IsMouseOverMe:
+			print("Wow i made it: "+str(mysocket)+" vs "+str(GGV.NetworkCon.mysocket))
 			var _a = _get_array_of_ability(AbilityClass.ACTIVATETARGET)
 			if _a.size()>0:
 				var IsAbilityAvailable:bool
