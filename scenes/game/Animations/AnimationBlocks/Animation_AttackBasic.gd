@@ -29,7 +29,8 @@ func _animation_playing(_delta, args:Array):
 					#Create damage numbers here also
 					var dmgNumobj:DamageNumberClass = load("res://scenes/game/visuals/damage_numbers.tscn").instantiate()
 					dmgNumobj.text = str(Dmgarr[i])
-					_victim.add_child(dmgNumobj)
+					dmgNumobj.position = _victim.position
+					_victim.get_parent().add_child(dmgNumobj)
 		2:#Rotate back
 			var tgtrot:float = 0
 			Attacker.rotation = lerp(Attacker.rotation,tgtrot,MoveSpd)

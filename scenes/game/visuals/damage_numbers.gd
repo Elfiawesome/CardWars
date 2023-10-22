@@ -5,11 +5,11 @@ enum{
 	EFFECT
 }
 
-var text = "45"
+var text = ""
 var Type = DAMAGENUMBER
 var tgtpos:Vector2
 var tgtscl:Vector2
-var color = Color.BLACK
+var color = Color.GHOST_WHITE
 
 var anistage = 0
 @onready var label = $Label
@@ -23,11 +23,12 @@ func _ready():
 	modulate = color
 	#Set target pos
 	tgtpos = position
-	tgtpos.y = tgtpos.y-80 + randf_range(-40,40)
-	tgtpos.x = tgtpos.x+randf_range(-40,40)
+	tgtpos.y = tgtpos.y-randf_range(20,90)
+	tgtpos.x = tgtpos.x+randf_range(-30,30)
 	
 	if Type == DAMAGENUMBER:
-		tgtscl = Vector2(3,3)*clamp(int(text)/20,1,2.5)
+		scale  = Vector2(1,1)*clamp(int(text)/13,1.7,3.5)
+		tgtscl = Vector2(1,1)
 
 
 func _process(delta):

@@ -88,6 +88,8 @@ func _Server_Player_ReceiveData(socket, message):
 			_svrRemoveCardFromHand(buffer)
 		NetworkServer.ATTACKCARDHOLDER:
 			_svrAttackCardholder(socket,buffer)
+		NetworkServer.ACTIVATETARGETABILITY:
+			_svrActivateTargetAbility(socket,buffer)
 func _process(_delta):
 	if mysocket!=-1:
 		DebugDrawOverlay()

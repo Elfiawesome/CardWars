@@ -75,6 +75,8 @@ func _Client_Player_ReceiveData(message):
 			_RemoveCardFromHand(buffer)
 		NetworkClient.ATTACKCARDHOLDER:
 			_AttackCardholder(buffer)
+		NetworkClient.ACTIVATETARGETABILITY:
+			_ActivateTargetAbility(buffer)
 func _process(_delta):
 	if mysocket!=-1:
 		DebugDrawOverlay()

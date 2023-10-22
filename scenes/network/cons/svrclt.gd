@@ -15,6 +15,7 @@ var GameSettings = {
 var Turn = 0
 var Turnstage = []
 var SelectedAttackingCards: Array[CardholderNode] = []
+var SelectedAbilityCards: Array[CardholderNode] = []
 var AnimationList = []
 var AnimationHandler:AnimationHandlerNode = preload("res://scenes/game/Animations/animation_handler.tscn").instantiate()
 
@@ -134,11 +135,25 @@ func IsMyTurn():
 func _on_cardholder_pressed(Cardholder:CardholderNode):
 	if !GGV.IsGame:
 		return
+	# Clicking Cardhodler to activate my target ability
+	if SelectedAbilityCards.size()>0:
+		#Create the ability target map
+		var AbilityTargetMap:Dictionary
+		AbilityTargetMap["Attackers"] = []
+		for SelectedCardholder in SelectedAbilityCards:
+			AbilityTargetMap["Attackers"].push_back([SelectedCardholder.mysocket,SelectedCardholder.Pos,SelectedCardholder.CurrentAbilityTarget])
+		AbilityTargetMap["Victim"] = [Cardholder.mysocket,Cardholder.Pos]
+		#Commit the Ability Target
+		if GGV.NetworkCon.IsServer:
+			_svrActivateTargetAbility(0,[AbilityTargetMap])
+		else:
+			NetworkClient.SendData([NetworkServer.ACTIVATETARGETABILITY,[AbilityTargetMap]])
+	# Clicking Cardholder to Attack
 	if mysocket != Turnstage[Turn]:
 		return
 	var _con:PlayerConNode = socket_to_instanceid[Cardholder.mysocket]
-	if _con.Team == get_local_con().Team:#MY own cards
-		if Cardholder.CardID!=0 && GGV.GameStage == GGV.ATTACKINGTURN:
+	if _con.Team == get_local_con().Team:# MY own cards (Also my teammate's card?)
+		if Cardholder.mysocket == mysocket && Cardholder.CardID!=0 && !Cardholder.Ability_Selected && GGV.GameStage == GGV.ATTACKINGTURN:
 			if SelectedAttackingCards.find(Cardholder)!=-1:
 				Cardholder._attackdeselected()
 				SelectedAttackingCards.erase(Cardholder)
@@ -146,7 +161,7 @@ func _on_cardholder_pressed(Cardholder:CardholderNode):
 				if Cardholder.CanAttack():
 					Cardholder._attackselected()
 					SelectedAttackingCards.push_back(Cardholder)
-	else:#Other teams
+	else:# Other teams
 		#Attacking other cardholders
 		if (SelectedAttackingCards.size()>0) && (Cardholder.CardID!=0):
 			#Create the attack map
@@ -170,6 +185,8 @@ func _on_cardholder_pressed(Cardholder:CardholderNode):
 func _on_cardholder_hover(Cardholder:CardholderNode):
 	for SelectedCardholder in SelectedAttackingCards:
 		SelectedCardholder._hoveroncardholder(Cardholder)
+	for SelectedCardholder in SelectedAbilityCards:
+		SelectedCardholder._hoveroncardholder(Cardholder)
 
 
 func DebugDrawOverlay():
@@ -189,7 +206,8 @@ func DebugDrawOverlay():
 		"\nTurnStage: " + str(Turnstage) + "["+str(Turn)+"] " + _strgamestage + 
 		"\nCardList: " + str(_cardlist) + 
 		"\nCardIdentifier: "+str(GGV.HandCardIdentifier) + 
-		"\nSelectedHolders: "+str(SelectedAttackingCards)
+		"\nSelectedHolders: "+str(SelectedAttackingCards) + 
+		"\nSelectedAbilities: "+str(SelectedAbilityCards)
 	)
 
 func _EndOfAttackingTurnChecks():
@@ -202,12 +220,16 @@ func _EndOfAttackingTurnChecks():
 				cardholder.Stats["Lifespan"]+=1
 				#Reset Attacks
 				cardholder.Stats["AtkLeft"] = cardholder.Stats["AtkMax"]
-				#Reset Abilities
+				#Reset Abilities & reduce cooldown
+				for AbilityDat in cardholder.Stats["Ability"]:
+					AbilityDat["Completed"]=false
+					if AbilityDat["Cooldown"]>0:
+						AbilityDat["Cooldown"]-=1
 				#Reset ability here
 	for sock in socket_to_instanceid:
 		var _con:PlayerConNode = socket_to_instanceid[sock]
 		for cardholder in _con.Cardholderlist:
-			cardholder._activate_intrinsic_ability()
+			cardholder._ability_all_intrinsic_ability()
 	#SpellsCheck
 	#TimerRecution & Deaths
 	for sock in socket_to_instanceid:
@@ -315,3 +337,31 @@ func _AttackCardholder(buffer: Array):
 				DamageArray.append(dmg)
 			#Animation handling
 			AnimationHandler.AddAnimationSingleToQueue(AnimationBlock.new(),[AttackerObj,VictimArray,DamageArray])
+func _svrActivateTargetAbility(socket, buffer:Array):
+	_ActivateTargetAbility(buffer)
+	for sock in socketlist:
+		NetworkServer.SendData(sock,[NetworkServer.ACTIVATETARGETABILITY,buffer])
+func _ActivateTargetAbility(buffer:Array):
+	var AbilityTargetMap = buffer[0]
+	var AttackingCardholderDatas = AbilityTargetMap["Attackers"]
+	var VictimCardholderData = AbilityTargetMap["Victim"]
+	var VictimCardholder:CardholderNode = socket_to_instanceid[VictimCardholderData[0]].Cardholderlist[VictimCardholderData[1]]
+	
+	var DeselctedCards:Array = []
+	
+	for AttackingCardholderData in AttackingCardholderDatas:
+		var AttackingCardholder:CardholderNode = socket_to_instanceid[AttackingCardholderData[0]].Cardholderlist[AttackingCardholderData[1]]
+		AttackingCardholder.CurrentAbilityTarget = AttackingCardholderData[2]
+		# Checks if target is activatable
+		var IsTargetValid:bool
+		var Ability:AbilityTargetClass = AttackingCardholder._new_ability_node(AttackingCardholder.Stats["Ability"][AttackingCardholder._get_selected_target_ability_index()])
+		IsTargetValid = Ability._is_ability_target_valid(AttackingCardholder, VictimCardholder)
+		Ability.queue_free()
+		
+		if IsTargetValid:
+			AttackingCardholder._ability_selected_activate_target_ability(VictimCardholder)
+			DeselctedCards.append(AttackingCardholder)
+	
+	for SelectedCardholder in DeselctedCards:
+		SelectedAbilityCards.erase(SelectedCardholder)
+		SelectedCardholder._abilitydeselected()

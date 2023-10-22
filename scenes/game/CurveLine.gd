@@ -14,7 +14,7 @@ var slideoff = 0.0
 var BendPos = Vector2(0,0)
 func _ready():
 	pass
-func _process(delta):
+func _process(_delta):
 	BendPos = (EndPos+StartPos)/2
 	if StartPos.x>EndPos.x:
 		slideoff = lerp(slideoff,50.0,0.1)
