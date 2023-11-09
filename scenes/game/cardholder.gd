@@ -1,46 +1,57 @@
 extends Node2D
 class_name CardholderNode
-#Variables
-var CardID = 0
-var Stats = {}
+# Networking/Identifier Variables
 var Pos = 0
 var mysocket = -1
+# Game Variables
+var CardID = 0
+var Stats = {}
+# Client control Variables
 var Attack_Selected = false
 var Ability_Selected = false
 var CurrentAbilityTarget:int=0
+var IsMouseOverMe:bool = false
+var IsOtherCardholderHovered:CardholderNode = null
+# Visual effect variables
 var originalscale = 0.2
 var TimerCount: float = 0
-enum DAMAGETYPE{
-	DEFAULTDAMAGE=1,
-	SPLASHDAMAGE,
-	CRITDAMAGE
-}
-#Other client side stuff
+var IsAnimating:bool = false
 @onready var Sprite = $Sprite
-@onready var Collision = $Sprite/Control
+@onready var CollisionMask = $Sprite/CollisionMask
 @onready var CurveLine:CurveLineClass = $CurveLine
 var DefaultCardholder = preload("res://assets/cards/Misc/CardHolderGrey.png")
 var HomePos:Vector2
 var ShakeAmt:float = 0
 var ShakePos:Vector2  = Vector2(0,0)
-var IsMouseOverMe:bool = false
-var IsOtherCardholderHovered:CardholderNode = null
 
-# stuff need fixing:
+enum DAMAGETYPE{
+	DEFAULTDAMAGE=1,
+	SPLASHDAMAGE,
+	CRITDAMAGE
+}
+
 # when selected a card, and it dies, then the card would still be selected
 # When card is hovering over other cards, isualize so that we know we are attacking that one
 # Damage Numbers goofy looking sort of
 # Animation effects are needed!
 # Ability data management is needed (go relook at the AbilityClass)
 # 	>Make it so that each ability is seperated in their own owners. then ened change the ability functions inside cardholders as well
-# Ability Type should be in ENUMS not string (Typo erros can cause stuff)
-# Make updating numbers / updating sprite all different events. Gather them all up and call it update_self which does all the events
 func _ready():
-	Sprite.texture = DefaultCardholder
 	_clear()
+	_update_visual()
+	
+	CollisionMask.gui_input.connect(_collisionmask_gui_input)
+func _collisionmask_gui_input(event:InputEvent):
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if !event.pressed:
+				print("released!")
+				if GGV.Playspace.SelectedCard!=-1:
+					print("going to place")
+
 
 func _process(_delta):
-	$DebugText.text=str(mysocket)
+	$DebugText.text=str(mysocket) # Debugging only
 	_Is_Mouse_Over_Me()
 	if Attack_Selected or Ability_Selected:
 		var _outersc:float = 0.01*sin(TimerCount * 10)
@@ -85,8 +96,6 @@ func _process(_delta):
 	else:
 		ShakePos = position
 	
-	
-	
 	#move timer by 1
 	TimerCount+=_delta
 
@@ -102,7 +111,6 @@ func _input(event):
 	# Ability activating self
 	if event is InputEventKey:
 		if event.keycode == KEY_A && event.is_pressed() && IsMouseOverMe:
-			print("Wow i made it: "+str(mysocket)+" vs "+str(GGV.NetworkCon.mysocket))
 			var _a = _get_array_of_ability(AbilityClass.ACTIVATETARGET)
 			if _a.size()>0:
 				var IsAbilityAvailable:bool
@@ -148,19 +156,12 @@ func _Is_Mouse_Over_Me():
 		if (mpos.y > - Sprite.texture.get_height()*Sprite.scale.y/2) && (mpos.y <  Sprite.texture.get_height()*Sprite.scale.y/2):
 			IsMouseOverMe=true
 			GGV.NetworkCon._on_cardholder_hover(self)
+
 func _hoveroncardholder(HoveredCardholder:CardholderNode):
 	IsOtherCardholderHovered = HoveredCardholder
 
 
-func _update_actual_visual():
-	if CardID!=0:
-		$HpBox/HP.text=str(Stats["Hp"])
-		$AtkBox/ATK.text=str(Stats["Atk"])
-		if Sprite.texture.resource_path != UnitData.CardData[CardID]["Texture"]:
-			Sprite.texture = load(UnitData.CardData[CardID]["Texture"])
-	else:
-		Sprite.texture = DefaultCardholder
-		position = HomePos
+# Input related functions
 func _attackselected():
 	Attack_Selected=true
 	CurveLine.visible=true
@@ -180,10 +181,8 @@ func _abilitydeselected():
 	CurrentAbilityTarget=0
 func _realpos() -> Vector2: 
 	return position+get_parent().position
-#Make an update function that ultimately shows how the card is at the end
-#Then all the animation should be backlogged by somekind of array of sorts
-#Any animation can run even tho the card is technically dead
 
+# Action Functions
 func _attack_cardholder(Victim:CardholderNode, damagetype):
 	#Determine damage
 	var dmg = Stats["Atk"]
@@ -195,7 +194,7 @@ func _attack_cardholder(Victim:CardholderNode, damagetype):
 	Stats["AtkLeft"]-=1
 	#Do damage
 	Victim.Stats["Hp"] -= dmg
-	Victim._update_actual_visual()
+	Victim._update_visual_numbers()
 	
 	return dmg
 func _clear():
@@ -257,7 +256,9 @@ func _clear():
 	print(JSON.stringify(Stats))
 func _death():
 	_clear()
-#Ability functions
+
+
+# Ability functions
 func _get_array_of_ability(AbilityType:int) -> Array:
 	var _a = []
 	var _c = 0
@@ -286,7 +287,7 @@ func _ability_all_intrinsic_ability():
 			Ability.AbilityData=AbilityDat
 			Ability._activate_ability(self)
 			AbilityDat["Completed"]=true
-	_update_actual_visual()
+	_update_visual()
 func _ability_selected_activate_ability():
 	pass
 func _ability_selected_activate_target_ability(VictimCardholder:CardholderNode):
@@ -301,7 +302,30 @@ func __activate_target_end_ability():
 	pass#Unused?
 
 
-#External Functions
+# Update Visual Functions
+func _update_visual():
+	_update_visual_sprite()
+	_update_visual_numbers()
+	_update_visual_statuseffects()
+func _update_visual_sprite():
+	if CardID!=0:
+		$HpBox.visible=true
+		$AtkBox.visible=true
+		if Sprite.texture.resource_path != UnitData.CardData[CardID]["Texture"]:
+			Sprite.texture = load(UnitData.CardData[CardID]["Texture"])
+	else:
+		$HpBox.visible=false
+		$AtkBox.visible=false
+		Sprite.texture = DefaultCardholder
+		position = HomePos
+func _update_visual_numbers():
+	if CardID!=0:
+		$HpBox/HP.text = str(Stats["Hp"])
+		$AtkBox/ATK.text = str(Stats["Atk"])
+func _update_visual_statuseffects():
+	pass
+
+# External Retreival? Functions
 func GetMultiStatID():
 	var MultiStatID:Array = [Stats["UnitIdentifier"],mysocket,Pos]
 	return MultiStatID

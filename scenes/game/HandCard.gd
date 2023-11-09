@@ -137,6 +137,7 @@ func _on_control_gui_input(event):
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:#Selecting me
 				Playspace.SelectedCard=CardPos
+				#$Sprite/Control.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			if !event.pressed:#Unselecting me
 				if Playspace.SelectedCard==CardPos:
 					Playspace.SelectedCard=-1
@@ -156,6 +157,15 @@ func _on_control_gui_input(event):
 								Disableself=10
 							#Remove my own card on client end (And yes i know if there is packet loss somehow, player will lose their card :<)
 							PlacedOnCardholder = holder
+
+func _input(event):
+	if event is InputEventMouseButton:
+		if !event.pressed:
+			if Playspace.SelectedCard==CardPos:
+				pass
+				#Playspace.SelectedCard=-1
+				#$Sprite/Control.mouse_filter = Control.MOUSE_FILTER_STOP
+
 
 func IsCardHoveringCardholder():
 	var _r = null

@@ -8,18 +8,19 @@ func _animation_playing(_delta, args:Array):
 	var Attacker:CardholderNode = args[0]
 	var Victimarr:Array[CardholderNode] = args[1]
 	var Dmgarr:Array = args[2]
-	var MoveSpd = 14*_delta
-	var lerptresh = 0.1*20
+	var MoveSpd = 14*_delta#not used
+	var blend = 1-pow(0.5, _delta*14*2)
+	var lerptresh = 2
 	match AnimationStage:
 		0:#Move Attacker to Victim
 			var RelativeVictimPos = get_cardholder_relative_position(Attacker, Victimarr[0])
-			Attacker.position = lerp(Attacker.position,RelativeVictimPos,MoveSpd)
+			Attacker.position = lerp(Attacker.position,RelativeVictimPos,blend)
 			Attacker.z_index = 1
 			if abs(Attacker.position.y - RelativeVictimPos.y)<lerptresh && abs(Attacker.position.x - RelativeVictimPos.x)<lerptresh:
 				AnimationStage = 1
 		1:#Rotate left
 			var tgtrot:float = deg_to_rad(-45)
-			Attacker.rotation = lerp(Attacker.rotation,tgtrot,MoveSpd)
+			Attacker.rotation = lerp(Attacker.rotation,tgtrot,blend)
 			if abs(Attacker.rotation - tgtrot)<0.1:
 				AnimationStage = 2
 				for i in Victimarr.size():
@@ -33,12 +34,12 @@ func _animation_playing(_delta, args:Array):
 					_victim.get_parent().add_child(dmgNumobj)
 		2:#Rotate back
 			var tgtrot:float = 0
-			Attacker.rotation = lerp(Attacker.rotation,tgtrot,MoveSpd)
+			Attacker.rotation = lerp(Attacker.rotation,tgtrot,blend)
 			if abs(Attacker.rotation - tgtrot)<0.1:
 				Attacker.rotation = tgtrot
 				AnimationStage = 3
 		3:#Return to home position
-			Attacker.position = lerp(Attacker.position,Attacker.HomePos,MoveSpd)
+			Attacker.position = lerp(Attacker.position,Attacker.HomePos,blend)
 			Attacker.z_index = 0
 			if abs(Attacker.position.y - Attacker.HomePos.y)<lerptresh && abs(Attacker.position.x - Attacker.HomePos.x)<lerptresh:
 				AnimationStage = 4

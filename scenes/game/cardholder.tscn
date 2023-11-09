@@ -51,16 +51,24 @@ grow_vertical = 2
 size_flags_horizontal = 8
 color = Color(1, 1, 1, 0.486275)
 
-[node name="ATK" type="Label" parent="."]
-visible = false
-offset_left = -36.0
-offset_top = -95.0
-offset_right = -26.0
-offset_bottom = -68.0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-text = "0"
-horizontal_alignment = 1
-vertical_alignment = 1
+[node name="CollisionMask" type="Control" parent="Sprite"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -421.0
+offset_top = -636.0
+offset_right = -421.0
+offset_bottom = -636.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Control" type="Control" parent="Sprite/CollisionMask"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+grow_vertical = 2
 
 [node name="HpBox" type="Control" parent="."]
 layout_mode = 3

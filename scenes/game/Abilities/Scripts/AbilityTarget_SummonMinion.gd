@@ -8,7 +8,7 @@ func _is_ability_target_valid(Attacker:CardholderNode, Victim:CardholderNode):
 func _activate_target_ability(Attacker:CardholderNode, Victim:CardholderNode):
 	var VictimCon:PlayerConNode = GGV.NetworkCon.socket_to_instanceid[Victim.mysocket]
 	VictimCon._SummonCard(UnitData.Destiny2_Wyvern,Victim.Pos)
-	Victim._update_actual_visual()
+	Victim._update_visual()
 	AbilityData["Cooldown"] = AbilityData["CooldownMax"]
 	
 	

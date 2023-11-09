@@ -239,7 +239,7 @@ func _EndOfAttackingTurnChecks():
 				#Death
 				if cardholder.Stats["Hp"]<1:
 					cardholder._death()
-					cardholder._update_actual_visual()
+					cardholder._update_visual()
 	#Victory
 func _svrTurnMoveOn():
 	_TurnMoveOn()

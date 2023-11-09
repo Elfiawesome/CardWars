@@ -88,7 +88,7 @@ func _SummonCard(CardID, Pos):
 				]
 			)
 		#Visual looks
-		_inst._update_actual_visual()
+		_inst._update_visual()
 		#_inst.Sprite.texture = load(UnitData.CardData[CardID]["Texture"])
 #is funcitons
 func BattlefieldSize():

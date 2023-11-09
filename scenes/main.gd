@@ -20,6 +20,8 @@ var Zoomfactor = Vector2(1,1)
 func _ready():
 	GGV.Playspace = self
 	get_viewport().get_camera_2d().position = get_viewport().size/2
+	#var csui=load("res://scenes/game/ui/CardSelectorUI.tscn").instantiate()
+	#$MainCamera/GUI.add_child(csui)
 
 func _process(_delta):
 	#Cards

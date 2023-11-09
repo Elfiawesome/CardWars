@@ -16,7 +16,10 @@ z_index = 1
 [node name="GUI" type="CanvasLayer" parent="MainCamera"]
 
 [node name="DebugOverlay" type="Label" parent="MainCamera/GUI"]
-offset_right = 1237.0
-offset_bottom = 706.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 text = "DEBUG"
 script = ExtResource("2_c2ygw")
