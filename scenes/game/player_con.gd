@@ -62,7 +62,7 @@ func _CreateCardHolders(Isenemy):
 func _SummonCard(CardID, Pos):
 	if Pos<Cardholderlist.size():
 		#Initialize identifier vars
-		var _inst = Cardholderlist[Pos]
+		var _inst:CardholderNode = Cardholderlist[Pos]
 		_inst.Stats["UnitIdentifier"] = GGV.UnitIdentifier
 		GGV.UnitIdentifier+=1
 		_inst.CardID = CardID
@@ -87,9 +87,23 @@ func _SummonCard(CardID, Pos):
 					UnitData.CardData[CardID]["SpAtk"]["SplashATK"]
 				]
 			)
+		# Abilities
+		var AbilityData = UnitData.CardData[CardID]["Abilities"]
+		if AbilityData.size()>0:
+			for _AbilityData in AbilityData:
+				var _d = {
+					"ID":_inst.GetMultiStatID(),
+					"AbilityType":_AbilityData["Type"],
+					"Ability":_AbilityData["Path"],
+					"Completed":false,
+					"Cooldown":0,
+					"CooldownMax":0
+				}
+				for _data in _AbilityData["Data"]:
+					_d[_data] = _AbilityData["Data"][_data]
+				_inst.Stats["Ability"].push_back(_d)
 		#Visual looks
 		_inst._update_visual()
-		#_inst.Sprite.texture = load(UnitData.CardData[CardID]["Texture"])
 #is funcitons
 func BattlefieldSize():
 	var _size = 0

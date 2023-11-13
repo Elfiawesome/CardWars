@@ -33,6 +33,7 @@ func _ready():
 	InitUnitCard(Destiny2_Servitor,14,10,18,"Servitor","Grants Immunity to one other ally on the battlefield",lf+"Destiny2_Servitor.png")
 	InitUnitCard(Destiny2_Wyvern,25,15,14,"Wyvern","Sweep or Cross ATK",lf+"Destiny2_Wyvern.png")
 	CardData[Destiny2_Wyvern]["SpAtk"]["SweepATK"]=true
+	CardData[Destiny2_Wyvern]["Abilities"].append(GetAbilityData("AbilityTarget_DoubleStats.gd",AbilityClass.ACTIVATETARGET,{"CooldownMax":2,"Cooldown":0}))
 	
 	InitUnitCard(FanFron_Applebat,5,1,1,"Apple Bat","",lf+"FanFron_Applebat.png")
 	InitUnitCard(FanFron_FantasticDragon,25,10,18,"Fantastic Frontier","",lf+"FanFron_FantasticDragon.png")
@@ -41,6 +42,9 @@ func _ready():
 	InitUnitCard(FanFron_ForestWalker,15,5,8,"Forest Walker","",lf+"FanFron_ForestWalker.png")
 	CardData[FanFron_ForestWalker]["SpAtk"]["SplashATK"]=10
 	
+	var file = FileAccess.open("res://UnitData.json",FileAccess.WRITE)
+	file.store_string(JSON.stringify(CardData))
+	file.close()
 func InitUnitCard(id,Hp: int,Atk: int,Pt: int,Name:String, AbilityDescription:String, texturepath:String):
 	CardData[id]={
 		"Name": Name,
@@ -49,10 +53,17 @@ func InitUnitCard(id,Hp: int,Atk: int,Pt: int,Name:String, AbilityDescription:St
 		"Pt": Pt,
 		"AbilityDescription": AbilityDescription,
 		"Texture": texturepath,
-		"Abilities":{
+		"Abilities":[
 			
-		},
+		],
 		"SpAtk":{
 			
 		}
+	}
+
+func GetAbilityData(AbilityPath:String, AbilityType, Data:Dictionary = {}) -> Dictionary:
+	return {
+		"Path": AbilityPath,
+		"Type":AbilityType,
+		"Data":Data
 	}

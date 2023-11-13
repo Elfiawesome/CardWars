@@ -44,6 +44,8 @@ func _ready():
 func _collisionmask_gui_input(event:InputEvent):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				print("pressed!")
 			if !event.pressed:
 				print("released!")
 				if GGV.Playspace.SelectedCard!=-1:
@@ -211,38 +213,38 @@ func _clear():
 	Stats["AtkMax"] = 1
 	#Abilities
 	Stats["Ability"] = [
-		{
-			"ID":GetMultiStatID(),
-			"AbilityType":AbilityClass.ACTIVATETARGET,
-			"Ability":"AbilityTarget_DoubleStats.gd",
-			"Completed":false,
-			"Cooldown":0,
-			"CooldownMax":2
-		},
-		{
-			"ID":GetMultiStatID(),
-			"AbilityType":AbilityClass.INTRINSIC,
-			"Ability":"Ability_DoubleStats.gd",
-			"Completed":false,
-			"Cooldown":0,
-			"CooldownMax":0
-		},
-		{
-			"ID":GetMultiStatID(),
-			"AbilityType":AbilityClass.INTRINSIC,
-			"Ability":"Ability_DoubleStats.gd",
-			"Completed":false,
-			"Cooldown":0,
-			"CooldownMax":0
-		},
-		{
-			"ID":GetMultiStatID(),
-			"AbilityType":AbilityClass.ACTIVATETARGET,
-			"Ability":"AbilityTarget_SummonMinion.gd",
-			"Completed":false,
-			"Cooldown":0,
-			"CooldownMax":3
-		},
+#		{
+#			"ID":GetMultiStatID(),
+#			"AbilityType":AbilityClass.ACTIVATETARGET,
+#			"Ability":"AbilityTarget_DoubleStats.gd",
+#			"Completed":false,
+#			"Cooldown":0,
+#			"CooldownMax":2
+#		},
+#		{
+#			"ID":GetMultiStatID(),
+#			"AbilityType":AbilityClass.INTRINSIC,
+#			"Ability":"Ability_DoubleStats.gd",
+#			"Completed":false,
+#			"Cooldown":0,
+#			"CooldownMax":0
+#		},
+#		{
+#			"ID":GetMultiStatID(),
+#			"AbilityType":AbilityClass.INTRINSIC,
+#			"Ability":"Ability_DoubleStats.gd",
+#			"Completed":false,
+#			"Cooldown":0,
+#			"CooldownMax":0
+#		},
+#		{
+#			"ID":GetMultiStatID(),
+#			"AbilityType":AbilityClass.ACTIVATETARGET,
+#			"Ability":"AbilityTarget_SummonMinion.gd",
+#			"Completed":false,
+#			"Cooldown":0,
+#			"CooldownMax":3
+#		},
 	]
 	#SP attacks
 	Stats["CrossATK"] = []
