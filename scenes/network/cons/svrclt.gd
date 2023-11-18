@@ -337,7 +337,7 @@ func _AttackCardholder(buffer: Array):
 				DamageArray.append(dmg)
 			#Animation handling
 			AnimationHandler.AddAnimationSingleToQueue(AnimationBlock.new(),[AttackerObj,VictimArray,DamageArray])
-func _svrActivateTargetAbility(socket, buffer:Array):
+func _svrActivateTargetAbility(_socket, buffer:Array):
 	_ActivateTargetAbility(buffer)
 	for sock in socketlist:
 		NetworkServer.SendData(sock,[NetworkServer.ACTIVATETARGETABILITY,buffer])

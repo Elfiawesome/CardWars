@@ -7,7 +7,7 @@ func _is_ability_target_valid(Attacker:CardholderNode, Victim:CardholderNode):
 	return false
 
 func _activate_target_ability(Attacker:CardholderNode, Victim:CardholderNode):
-	Victim.Stats["Hp"] += 5
+	Victim.Stats["Hp"] += Victim.Stats["Hp"]
 	Victim._update_visual()
 	AbilityData["Cooldown"] = AbilityData["CooldownMax"]
 	

@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://dm8uf423g6xfk"]
+[gd_scene load_steps=4 format=3 uid="uid://dm8uf423g6xfk"]
 
 [ext_resource type="Script" path="res://scenes/main.gd" id="1_3sgov"]
 [ext_resource type="Script" path="res://scenes/DebugOverlay.gd" id="2_c2ygw"]
+[ext_resource type="PackedScene" uid="uid://b5mbqsft2tvpx" path="res://scenes/game/cardholder_hero.tscn" id="3_tx12h"]
 
 [node name="Playspace" type="Node2D"]
 script = ExtResource("1_3sgov")
@@ -23,3 +24,6 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "DEBUG"
 script = ExtResource("2_c2ygw")
+
+[node name="cardholder_hero" parent="." instance=ExtResource("3_tx12h")]
+position = Vector2(-138, 287)

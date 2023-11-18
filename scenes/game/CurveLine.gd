@@ -6,7 +6,7 @@ var EndPos = Vector2(0,0)
 var StartClr = Color.DARK_GREEN
 var EndClr = Color.GREEN
 var wid = 10.0
-var step = 5#100
+
 #Color type
 
 
@@ -24,6 +24,7 @@ func _process(_delta):
 	
 	queue_redraw()
 func _draw():
+	var step = 5#100
 	var Points = _quadratic_bezier(
 		StartPos,
 		BendPos,

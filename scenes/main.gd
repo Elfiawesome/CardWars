@@ -17,6 +17,10 @@ var CameraIsDrag = false
 var CameraOffsetStart = Vector2(0,0)
 var Zoomfactor = Vector2(1,1)
 
+#
+#var _mouse_hovered_over_cardholder(Cardholder:CardholderNode):
+#	pass
+
 func _ready():
 	GGV.Playspace = self
 	get_viewport().get_camera_2d().position = get_viewport().size/2
