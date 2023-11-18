@@ -1,0 +1,28 @@
+[gd_scene load_steps=4 format=3 uid="uid://p3kexugr131m"]
+
+[ext_resource type="Script" path="res://scenes/rooms/playspace/hand_card.gd" id="1_bdnrc"]
+[ext_resource type="Texture2D" uid="uid://blm2fpt6m33hh" path="res://assets/textures/card_back/CardBack_Unit.png" id="1_c6jkq"]
+[ext_resource type="Texture2D" uid="uid://lbk6bg130obl" path="res://assets/textures/units/Destiny2_Goblin.png" id="2_0t655"]
+
+[node name="HandCard" type="Node2D"]
+scale = Vector2(0.4, 0.4)
+script = ExtResource("1_bdnrc")
+
+[node name="FrontSprite" type="Sprite2D" parent="."]
+texture = ExtResource("2_0t655")
+
+[node name="CollisionBox" type="Control" parent="FrontSprite"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -421.0
+offset_top = -636.0
+offset_right = -421.0
+offset_bottom = -636.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BackSprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("1_c6jkq")

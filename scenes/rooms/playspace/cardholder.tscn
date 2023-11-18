@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3 uid="uid://m4yniv8r2vnm"]
+
+[ext_resource type="Script" path="res://scenes/rooms/playspace/cardholder.gd" id="1_e5p35"]
+[ext_resource type="Texture2D" uid="uid://oue1e4qjdhgf" path="res://assets/textures/units/Vest_Crabby.png" id="2_nqikm"]
+
+[node name="Cardholder" type="Node2D"]
+script = ExtResource("1_e5p35")
+
+[node name="CardSprite" type="Sprite2D" parent="."]
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("2_nqikm")
+
+[node name="CollisionBox" type="Control" parent="CardSprite"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -421.0
+offset_top = -636.0
+offset_right = -421.0
+offset_bottom = -636.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="."]
+offset_left = -63.0
+offset_top = -93.0
+offset_right = -23.0
+offset_bottom = -67.0
+text = "10"

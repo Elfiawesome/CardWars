@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://jsx76ypnad2"]
-
-[ext_resource type="Script" path="res://scenes/game/Animations/animation_handler.gd" id="1_siivb"]
-
-[node name="AnimationHandler" type="Node"]
-script = ExtResource("1_siivb")
