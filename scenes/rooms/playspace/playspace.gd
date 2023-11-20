@@ -33,11 +33,12 @@ func _input(event):
 			if event.keycode == KEY_ENTER:
 				_draw_specific_card(randi_range(1,UnitData.UNITDATA_MAX-1),0)
 			if event.keycode == KEY_SPACE:
-				var dat:Array = []
-				if global.NetworkCon.IsServer:
-					global.NetworkCon._svrNextTurn(global.NetworkCon.mysocket,dat)
-				else:
-					global.NetworkCon.network.SendData([NetworkNode.NEXTTURN,dat])
+				if global.NetworkCon.mysocket == global.NetworkCon.Turnstage[global.NetworkCon.Turn]: # Only if my turn
+					var dat:Array = []
+					if global.NetworkCon.IsServer:
+						global.NetworkCon._svrNextTurn(global.NetworkCon.mysocket,dat)
+					else:
+						global.NetworkCon.network.SendData([NetworkNode.NEXTTURN,dat])
 	if event is InputEventMouseButton:
 		var scrlamt = 0.05
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP && Zoomfactor.x<1.2:
@@ -55,6 +56,10 @@ func _manage_debuglabel():
 	debugtext.text = ""
 	debugtext.text+="List of players ("+str(len(global.NetworkCon.socketlist))+"):" + "\n"
 	debugtext.text += "Mysocket ("+str(global.NetworkCon.mysocket)+")" + "\n"
+	if global.NetworkCon.GameStage==global.NetworkCon.PLAYERTURN:
+		debugtext.text += "Gamestage: " + "PLAYER TURN (" + str(global.NetworkCon.GameStage) + ")\n"
+	else:
+		debugtext.text += "Gamestage: " + "ATTACKING TURN (" + str(global.NetworkCon.GameStage)+ ")\n"
 	for sock in global.NetworkCon.socketlist:
 		if global.NetworkCon.socket_to_instanceid[sock].IsInitialized:
 			var _playerinfo = global.NetworkCon.socket_to_instanceid[sock].PlayerInfo
@@ -148,6 +153,7 @@ func _arrangecardsbacktohand():
 		for handcard in HandCards:
 			var angle = PI+deg_to_rad( (180-anglespread)/2 + anglespread * ((i+1)/(HandCards.size()+1)) )
 			handcard.HomePos = Vector2(midcoord.x+Radsize.x*cos(angle),midcoord.y+Radsize.y*sin(angle))
+			handcard.AltHomePos = Vector2(midcoord.x+Radsize.x*cos(angle)/3,midcoord.y+Radsize.y*sin(angle)/3)
 			handcard.tgtpos = handcard.HomePos
 			
 			handcard.oriscale = Vector2(0.3,0.3)
@@ -168,12 +174,13 @@ func _on_card_gui_event(handcard:HandCard, event:InputEvent):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
-				print("Is done!")
 				if SelectedHandCard!=null:
 					SelectedHandCard.IsSelected = false
 				handcard.IsSelected = true
 				SelectedHandCard = handcard
+				_toggle_card_ishide()
 			else:
+				_toggle_card_ishide()
 				_on_card_released()
 func _on_card_released():
 	if SelectedHandCard!=null:
@@ -190,3 +197,7 @@ func _on_card_released():
 					global.NetworkCon.network.SendData([NetworkNode.REMOVECARDFROMHAND,RemoveCardBuffer])
 		SelectedHandCard.IsSelected = false
 		SelectedHandCard = null
+func _toggle_card_ishide():
+	for handcard in HandCards:
+		if !handcard.IsSelected:
+			handcard.IsHide = !handcard.IsHide

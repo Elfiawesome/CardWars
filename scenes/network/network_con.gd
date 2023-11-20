@@ -12,6 +12,11 @@ var IsServer = false
 var GameSettings = {"Gamemode":0,"TeamComposition":{}}
 var Turnstage:Array = []
 var Turn:int = 0
+enum {
+	PLAYERTURN = 0,
+	ATTACKINGTURN
+}
+var GameStage:int = PLAYERTURN
 var UnitIdentifier = 0
 var SpellIdentifier = 0
 var HandCardIndentifier = 0
@@ -113,8 +118,14 @@ func _NextTurn(buffer):
 		Turn+=1
 	else:
 		Turn = 0
+		if GameStage==PLAYERTURN:
+			GameStage=ATTACKINGTURN
+		else:
+			# End turn stuff here
+			GameStage=PLAYERTURN
 	# Reset Camera Offset
 	playspace.CameraOffset*=0
+	playspace.CameraFocusNo = Turn
 
 func _svrAddCardIntoHand(_socket:int, buffer:Array):
 	_AddCardIntoHand(buffer)

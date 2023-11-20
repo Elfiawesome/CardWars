@@ -9,6 +9,7 @@ var tgtrot:float = 0.0
 var orirot:float = tgtrot
 
 var tgtpos:Vector2 = Vector2(0,0)
+var AltHomePos:Vector2
 
 var tgtscale:Vector2 = Vector2(0.3,0.3)
 var oriscale:Vector2 = tgtscale
@@ -19,10 +20,12 @@ var timer:float = 0
 var Hidden:bool = false
 var AnimationStage:int = 0
 var IsSelected:bool = false
+var IsHide:bool = false
 # var IsHovered:bool = false
 @onready var FrontSprite = $FrontSprite
 @onready var BackSprite = $BackSprite
 @onready var collision_box = $FrontSprite/CollisionBox
+@onready var BorderOutline = $FrontSprite/CollisionBox/MarginContainer/BorderOutline
 
 
 signal mouse_entered
@@ -40,8 +43,10 @@ func _ready():
 	FrontSprite.texture = load(UnitData.CardData[CardID]["Texture"])
 
 func _on_mouse_entered():
+	BorderOutline.visible = true
 	emit_signal("mouse_entered",self)
 func _on_mouse_exited():
+	BorderOutline.visible = false
 	emit_signal("mouse_exited",self)
 func _on_gui_input(event):
 	emit_signal("gui_input",self, event)
@@ -72,15 +77,20 @@ func _process(delta):
 				tgtscale = 0.2 * get_viewport().get_camera_2d().zoom
 				tgtrot = deg_to_rad(20)
 			else:
-				tgtpos = HomePos
-				if IsHovered:
-					tgtpos.y = HomePos.y - (FrontSprite.texture.get_height() *  tgtscale.y)+100
-					tgtscale = oriscale*1.4
+				if IsHide:
+					tgtscale = oriscale
+					tgtpos = AltHomePos
 					tgtrot = 0
 				else:
 					tgtpos = HomePos
-					tgtscale = oriscale
-					tgtrot = orirot
+					if IsHovered:
+						tgtpos.y = HomePos.y - (FrontSprite.texture.get_height() *  tgtscale.y)+100
+						tgtscale = oriscale*1.4
+						tgtrot = 0
+					else:
+						tgtpos = HomePos
+						tgtscale = oriscale
+						tgtrot = orirot
 	
 	if IsSelected:
 		position = lerp(position, tgtpos, blend*20)

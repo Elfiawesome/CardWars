@@ -1,8 +1,16 @@
-[gd_scene load_steps=4 format=3 uid="uid://p3kexugr131m"]
+[gd_scene load_steps=5 format=3 uid="uid://p3kexugr131m"]
 
 [ext_resource type="Script" path="res://scenes/rooms/playspace/hand_card.gd" id="1_bdnrc"]
 [ext_resource type="Texture2D" uid="uid://blm2fpt6m33hh" path="res://assets/textures/card_back/CardBack_Unit.png" id="1_c6jkq"]
 [ext_resource type="Texture2D" uid="uid://lbk6bg130obl" path="res://assets/textures/units/Destiny2_Goblin.png" id="2_0t655"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cchge"]
+bg_color = Color(0.603922, 0.976471, 0.603922, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+corner_detail = 12
 
 [node name="HandCard" type="Node2D"]
 scale = Vector2(0.4, 0.4)
@@ -22,6 +30,26 @@ offset_right = -421.0
 offset_bottom = -636.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="FrontSprite/CollisionBox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = -20
+theme_override_constants/margin_top = -20
+theme_override_constants/margin_right = -20
+theme_override_constants/margin_bottom = -20
+
+[node name="BorderOutline" type="Panel" parent="FrontSprite/CollisionBox/MarginContainer"]
+visible = false
+z_index = -1
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_cchge")
 
 [node name="BackSprite" type="Sprite2D" parent="."]
 visible = false
