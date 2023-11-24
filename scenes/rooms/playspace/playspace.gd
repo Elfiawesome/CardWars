@@ -14,6 +14,7 @@ var Zoomfactor = Vector2(1,1)
 var HandCards:Array[HandCard] = []
 var SelectedHandCard:HandCard = null
 var HoveredCardholder:Card = null
+var HandCardsHide:bool = false
 
 func _ready():
 	get_tree().get_root().size_changed.connect(_on_window_resized)
@@ -198,6 +199,7 @@ func _on_card_released():
 		SelectedHandCard.IsSelected = false
 		SelectedHandCard = null
 func _toggle_card_ishide():
+	HandCardsHide = !HandCardsHide
 	for handcard in HandCards:
 		if !handcard.IsSelected:
-			handcard.IsHide = !handcard.IsHide
+			handcard.IsHide = HandCardsHide
