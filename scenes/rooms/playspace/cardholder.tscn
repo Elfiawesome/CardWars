@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://m4yniv8r2vnm"]
+[gd_scene load_steps=4 format=3 uid="uid://m4yniv8r2vnm"]
 
 [ext_resource type="Script" path="res://scenes/rooms/playspace/cardholder.gd" id="1_e5p35"]
 [ext_resource type="Texture2D" uid="uid://oue1e4qjdhgf" path="res://assets/textures/units/Vest_Crabby.png" id="2_nqikm"]
+[ext_resource type="FontFile" uid="uid://k6m3l8va7nfj" path="res://assets/fonts/ebrimabd.ttf" id="3_o1pci"]
 
 [node name="Cardholder" type="Node2D"]
 script = ExtResource("1_e5p35")
@@ -22,9 +23,66 @@ offset_bottom = -636.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Label" type="Label" parent="."]
-offset_left = -63.0
-offset_top = -93.0
+[node name="HpBox" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = -64.0
+offset_top = -89.0
+offset_right = -46.0
+offset_bottom = -71.0
+
+[node name="ColorRect" type="ColorRect" parent="HpBox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+rotation = 0.785398
+pivot_offset = Vector2(9, 9)
+color = Color(0.596078, 0.596078, 0.596078, 1)
+
+[node name="Label" type="Label" parent="HpBox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_o1pci")
+text = "2"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AtkBox" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = -41.0
+offset_top = -92.0
 offset_right = -23.0
-offset_bottom = -67.0
-text = "10"
+offset_bottom = -74.0
+
+[node name="ColorRect" type="ColorRect" parent="AtkBox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+rotation = 0.785398
+pivot_offset = Vector2(9, 9)
+color = Color(0.596078, 0.596078, 0.596078, 1)
+
+[node name="Label" type="Label" parent="AtkBox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_o1pci")
+text = "2"
+horizontal_alignment = 1
+vertical_alignment = 1

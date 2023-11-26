@@ -1,6 +1,10 @@
 extends Card
 class_name Cardholder
 
+@onready var HpLabel = $HpBox/Label
+@onready var AtkLabel = $AtkBox/Label
+@onready var HpBox = $HpBox
+@onready var AtkBox = $AtkBox
 
 
 func _ready():
@@ -16,15 +20,23 @@ func _update_visuals():
 func _update_texture():
 	if CardID!=0:
 		CardSprite.texture = load(UnitData.CardData[CardID]["Texture"])
+		HpBox.visible = true
+		AtkBox.visible = true
 	else:
 		CardSprite.texture = load("res://assets/textures/misc/CardHolderGrey.png")
+		HpBox.visible = false
+		AtkBox.visible = false
+
 func _update_stats_numbers():
-	pass
+	if CardID!=0:
+		HpLabel.text = str(Stats["Hp"])
+		AtkLabel.text = str(Stats["Atk"])
 func _update_stats_effects():
 	pass
 
 
 func _reset_stats():
+	CardID = 0
 	Stats.clear()
 	Stats = {
 		"Hp":0,
@@ -39,6 +51,10 @@ func _reset_stats():
 func _summon_card(cardID,_data):
 	Identifier = global.NetworkCon.UnitIdentifier
 	CardID = cardID
+	Stats["Hp"] = UnitData.CardData[CardID]["Hp"]
+	Stats["HpMax"] = Stats["Hp"]
+	Stats["Atk"] = UnitData.CardData[CardID]["Atk"]
+	Stats["HpAtk"] = Stats["Atk"]
 	_update_visuals()
 
 func _is_valid_spot_to_summon() -> bool:
