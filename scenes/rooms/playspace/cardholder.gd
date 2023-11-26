@@ -26,7 +26,6 @@ func _update_texture():
 		CardSprite.texture = load("res://assets/textures/misc/CardHolderGrey.png")
 		HpBox.visible = false
 		AtkBox.visible = false
-
 func _update_stats_numbers():
 	if CardID!=0:
 		HpLabel.text = str(Stats["Hp"])
