@@ -16,6 +16,9 @@ var SelectedHandCard:HandCard = null
 var HoveredCardholder:Card = null
 var HandCardsHide:bool = false
 
+var SelectedAttackingCardholders:Array[Card] = []
+var SelectedAbilityCardholders:Array[Card] = []
+
 func _ready():
 	get_tree().get_root().size_changed.connect(_on_window_resized)
 
@@ -79,6 +82,8 @@ func _manage_debuglabel():
 	else:
 		debugtext.text+=" (Turnstage is empty...)"
 	debugtext.text+="\n"
+	debugtext.text+="Selected (Attacking): " + str(SelectedAttackingCardholders) + "\n"
+	debugtext.text+="Selected (Ability): " + str(SelectedAbilityCardholders) + "\n"
 	debugtext.text+="Identifier Indexes: HC:"+str(global.NetworkCon.HandCardIndentifier)+"; UC:"+str(global.NetworkCon.UnitIdentifier)+"; SC:"+str(global.NetworkCon.SpellIdentifier) + "\n"
 func _manage_camera(_delta):
 	if global.NetworkCon.Turn < global.NetworkCon.Turnstage.size():

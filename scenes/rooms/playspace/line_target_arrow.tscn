@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://dkdgbjvamhiqn"]
+
+[ext_resource type="Script" path="res://scenes/rooms/playspace/line_target_arrow.gd" id="1_dhfqa"]
+
+[sub_resource type="Curve" id="Curve_r5feq"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.865979, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[node name="LineTargetArrow" type="Node2D"]
+script = ExtResource("1_dhfqa")
+
+[node name="Line2D" type="Line2D" parent="."]
+width = 15.0
+width_curve = SubResource("Curve_r5feq")
+joint_mode = 2

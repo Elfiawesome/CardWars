@@ -19,7 +19,7 @@ var Identifier:int = -1
 var CardSprite:Sprite2D
 var HoveringRect:Rect2 = Rect2()
 var IsHovered:bool = false
-
+var SinTimer:float = 0
 
 # Collision Box Updates
 func _update_rect():
@@ -38,6 +38,8 @@ func _update_stats_numbers():
 func _update_stats_effects():
 	pass
 
+func _process(delta):
+	SinTimer += delta
 
 func _is_valid_spot_to_summon() -> bool:
 	return false
