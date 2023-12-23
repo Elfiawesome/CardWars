@@ -64,6 +64,7 @@ func _create_cardholders(IsEnemy:bool):
 			midpos = Vector2(0,_yoff-sign(_yoff)*cardhei)
 		
 		cardholder.position = midpos
+		cardholder.HomePos = cardholder.position
 		cardholder._update_rect()
 		cardholder.mysocket = mysocket
 func _get_battlefield_width()->float:

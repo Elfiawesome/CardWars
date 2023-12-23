@@ -63,14 +63,11 @@ func _on_CollisionBox_gui_input(event:InputEvent):
 					# Can only select if its my untis
 					if mysocket == global.NetworkCon.mysocket:
 						if global.NetworkCon.playspace.SelectedAttackingCardholders.find(self) == -1:
-							Selected = true
-							SelectedType = SELECTEDTYPE.ATTACKING
+							_attack_selected()
 							global.NetworkCon.playspace.SelectedAttackingCardholders.append(self)
-							TargettingArrow.visible = true
 						else:
-							Selected = false
+							_attack_deselected()
 							global.NetworkCon.playspace.SelectedAttackingCardholders.erase(self)
-							TargettingArrow.visible = false
 					# I don't think we should use 'global.NetworkCon.mysocket' since the attacker can be from a different team???? idk we can just leave it here i guess.
 					if (global.NetworkCon._get_team(mysocket) != global.NetworkCon._get_team(global.NetworkCon.mysocket)):
 						var attackingmap:Dictionary = {}
@@ -81,8 +78,15 @@ func _on_CollisionBox_gui_input(event:InputEvent):
 						if global.NetworkCon.IsServer:
 							global.NetworkCon._svrAttackCardholder(global.NetworkCon.mysocket, [attackingmap])
 						else:
+							# Attacks are client based
 							global.NetworkCon.network.SendData([NetworkNode.ATTACKCARDHOLDER, [attackingmap]])
-
+							global.NetworkCon._AttackCardholder([attackingmap])
+						# Deselecting
+						for _cardholderindex in range(global.NetworkCon.playspace.SelectedAttackingCardholders.size()-1,-1,-1):
+							var _cardholder:Cardholder = global.NetworkCon.playspace.SelectedAttackingCardholders[_cardholderindex]
+							if _cardholder.Stats["AtkLeft"]<1:
+								_cardholder._attack_deselected()
+								global.NetworkCon.playspace.SelectedAttackingCardholders.remove_at(_cardholderindex)
 
 # Update functions
 func _update_visuals():
@@ -105,6 +109,16 @@ func _update_stats_numbers():
 func _update_stats_effects():
 	pass
 
+# Local Action functions
+func _attack_selected():
+	Selected = true
+	SelectedType = SELECTEDTYPE.ATTACKING
+	TargettingArrow.CurrentPosition = Vector2(0,0)
+	TargettingArrow.visible = true
+func _attack_deselected():
+	Selected = false
+	TargettingArrow.visible = false
+
 
 # Action functions
 func _reset_stats():
@@ -115,6 +129,7 @@ func _reset_stats():
 		"HpMax":0,
 		"Atk":0,
 		"AtkMax":0,
+		"AtkLeft":1,
 		"HpBoost":[],
 		"AtkBoost":[],
 		"Ability":""
@@ -133,7 +148,8 @@ func _summon_card(cardID,_data):
 func _attack_cardholder(cardholder:Card):
 	if cardholder.CardID!=0:
 		cardholder.Stats["Hp"] -= Stats["Atk"]
-
+		cardholder._update_visuals()
+		Stats["AtkLeft"]-=1
 
 
 # Get functions

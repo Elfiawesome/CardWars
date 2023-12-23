@@ -180,12 +180,19 @@ func _RemoveCardFromHand(buffer):
 func _svrAttackCardholder(_socket:int, buffer:Array):
 	_AttackCardholder(buffer)
 	for sock in socketlist:
-		network.SendData(sock,[network.ATTACKCARDHOLDER,buffer])
+		if sock!=_socket:
+			network.SendData(sock,[network.ATTACKCARDHOLDER,buffer])
 func _AttackCardholder(buffer:Array):
 	var attackingmap = buffer[0]
-	var VictimCardholder:Cardholder = _get_cardholder(attackingmap["Victim"])
+	var UltimateVictimCardholder:Cardholder = _get_cardholder(attackingmap["Victim"])
+	var AnimationBlock = load("res://scenes/rooms/playspace/animation_handler/animation_blocks/Animation_AttackBasic.gd")
 	for cardreference in attackingmap["AttackingList"]:
-		var _attackingCardholder:Cardholder = _get_cardholder(cardreference)
-		_attackingCardholder._attack_cardholder(VictimCardholder)
-		_attackingCardholder._update_visuals()
-	VictimCardholder._update_visuals()
+		var AttackingCardholder:Cardholder = _get_cardholder(cardreference)
+		var VictimCardholders:Array[Cardholder] = [UltimateVictimCardholder]
+		for VictimCardholder in VictimCardholders:
+			AttackingCardholder._attack_cardholder(VictimCardholder)
+		
+		playspace.AnimationHandler.AddAnimationSingleToQueue(
+			AnimationBlock.new(), [AttackingCardholder,VictimCardholders, []]
+		)
+	

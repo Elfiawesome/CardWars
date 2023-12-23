@@ -19,7 +19,10 @@ var HandCardsHide:bool = false
 var SelectedAttackingCardholders:Array[Cardholder] = []
 var SelectedAbilityCardholders:Array[Cardholder] = []
 
+var AnimationHandler:AnimationHandlerNode = load("res://scenes/rooms/playspace/animation_handler/animation_handler.gd").new()
+
 func _ready():
+	add_child(AnimationHandler)
 	get_tree().get_root().size_changed.connect(_on_window_resized)
 
 func _input(event):
