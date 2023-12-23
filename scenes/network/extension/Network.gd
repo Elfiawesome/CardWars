@@ -15,6 +15,7 @@ enum{
 	SUMMONCARD,
 	REMOVECARDFROMHAND,
 	NEXTTURN,
+	ATTACKCARDHOLDER,
 }
 
 var MsgDetailedDescription = {
@@ -28,4 +29,5 @@ var MsgDetailedDescription = {
 	SUMMONCARD:"Summoning Card",
 	REMOVECARDFROMHAND:"Removing Card from hand",
 	NEXTTURN:">>Moving on to next turn>>",
+	ATTACKCARDHOLDER:"Attacking Cardholder",
 }

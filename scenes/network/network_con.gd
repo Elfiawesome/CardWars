@@ -26,9 +26,18 @@ func _create_player(socket:int) -> PlayerCon:
 	_inst.mysocket = socket
 	add_child(_inst)
 	return _inst
-
+func _is_local_turn() -> bool:
+	if Turnstage.is_empty():
+		return false
+	return (Turnstage[Turn] == mysocket)
+func _get_team(socket):
+	return socket_to_instanceid[socket].PlayerInfo["Team"]
+func _get_cardholder(reference:Array):
+	if reference[0]==0:
+		return socket_to_instanceid[reference[1]].Cardholderlist[reference[2]]
 
 func _svrREQUESTFORPLAYERDATA(_socket:int, _buffer:Array):
+	# Not sure what this does?
 	pass
 
 func _svrStartGame(_socket:int, _buffer:Array):
@@ -166,3 +175,17 @@ func _RemoveCardFromHand(buffer):
 	socket_to_instanceid[socket].HandCards.remove_at(handcardpos)
 	if socket==mysocket:
 		playspace._remove_specific_card(handcardpos)
+
+
+func _svrAttackCardholder(_socket:int, buffer:Array):
+	_AttackCardholder(buffer)
+	for sock in socketlist:
+		network.SendData(sock,[network.ATTACKCARDHOLDER,buffer])
+func _AttackCardholder(buffer:Array):
+	var attackingmap = buffer[0]
+	var VictimCardholder:Cardholder = _get_cardholder(attackingmap["Victim"])
+	for cardreference in attackingmap["AttackingList"]:
+		var _attackingCardholder:Cardholder = _get_cardholder(cardreference)
+		_attackingCardholder._attack_cardholder(VictimCardholder)
+		_attackingCardholder._update_visuals()
+	VictimCardholder._update_visuals()

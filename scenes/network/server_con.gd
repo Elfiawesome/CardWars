@@ -83,3 +83,5 @@ func _Server_Player_ReceiveData(socket, message):
 			_svrRemoveCardFromHand(socket, buffer)
 		network.NEXTTURN:
 			_svrNextTurn(socket, buffer)
+		network.ATTACKCARDHOLDER:
+			_svrREQUESTFORPLAYERDATA(socket, buffer)

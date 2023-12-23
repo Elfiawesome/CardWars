@@ -3,13 +3,20 @@
 [ext_resource type="Script" path="res://scenes/rooms/playspace/line_target_arrow.gd" id="1_dhfqa"]
 
 [sub_resource type="Curve" id="Curve_r5feq"]
-_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.865979, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+_data = [Vector2(0, 0.0727272), 0.0, 0.0, 0, 0, Vector2(0.798969, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.2), 0.0, 0.0, 0, 0]
 point_count = 3
 
 [node name="LineTargetArrow" type="Node2D"]
+z_index = 1
 script = ExtResource("1_dhfqa")
 
-[node name="Line2D" type="Line2D" parent="."]
+[node name="Line2DMain" type="Line2D" parent="."]
 width = 15.0
 width_curve = SubResource("Curve_r5feq")
+default_color = Color(0.941176, 0.941176, 0.941176, 1)
 joint_mode = 2
+
+[node name="ArrowHead" type="Polygon2D" parent="."]
+scale = Vector2(7, 7)
+offset = Vector2(-3, 0)
+polygon = PackedVector2Array(3, 0, 0, 5, 3, 3, 6, 5)

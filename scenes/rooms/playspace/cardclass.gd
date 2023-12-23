@@ -43,3 +43,5 @@ func _process(delta):
 
 func _is_valid_spot_to_summon() -> bool:
 	return false
+func _get_reference() -> Array:
+	return []

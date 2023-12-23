@@ -65,3 +65,5 @@ func _Client_Player_ReceiveData(message):
 			_RemoveCardFromHand(buffer)
 		network.NEXTTURN:
 			_NextTurn(buffer)
+		network.ATTACKCARDHOLDER:
+			_AttackCardholder(buffer)

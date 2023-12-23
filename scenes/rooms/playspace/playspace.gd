@@ -16,8 +16,8 @@ var SelectedHandCard:HandCard = null
 var HoveredCardholder:Card = null
 var HandCardsHide:bool = false
 
-var SelectedAttackingCardholders:Array[Card] = []
-var SelectedAbilityCardholders:Array[Card] = []
+var SelectedAttackingCardholders:Array[Cardholder] = []
+var SelectedAbilityCardholders:Array[Cardholder] = []
 
 func _ready():
 	get_tree().get_root().size_changed.connect(_on_window_resized)
@@ -208,3 +208,5 @@ func _toggle_card_ishide():
 	for handcard in HandCards:
 		if !handcard.IsSelected:
 			handcard.IsHide = HandCardsHide
+
+
