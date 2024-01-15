@@ -14,6 +14,8 @@ var PlayerInfo = {
 }
 # Visual Variables
 var HomePos:Vector2
+var ReorganizeCardholders:bool = false
+var ReorganizeStage:int = 0
 # Game variables
 var Cardholderlist:Array[Cardholder] = []
 var UnitDeck:Array = []
@@ -22,8 +24,41 @@ var HandCards:Array = []
 var HeroID:int
 
 func _process(_delta):
-	pass
 	$Label.text = str(mysocket)
+	
+	if ReorganizeCardholders:
+		if ReorganizeStage == 0:
+			ReorganizeStage = 1
+		var blend = 1-pow(0.5,_delta*15)
+		match ReorganizeStage:
+			1:
+				var tgtpos:Vector2 = Vector2(0,0)
+				var ready:int = 0
+				for cardholder in Cardholderlist:
+					cardholder.position = lerp(cardholder.position, tgtpos, blend)
+					if abs(cardholder.position.x-tgtpos.x)<0.1 && abs(cardholder.position.y-tgtpos.y)<0.1:
+						cardholder.position = tgtpos
+						ready+=1
+				if ready == Cardholderlist.size():
+					ReorganizeStage = 2
+			2:
+				var tgtpos:Vector2
+				var ready:int = 0
+				for cardholder in Cardholderlist:
+					tgtpos = cardholder.HomePos
+					cardholder.position = lerp(cardholder.position, tgtpos, blend)
+					if abs(cardholder.position.x-tgtpos.x)<0.1 && abs(cardholder.position.y-tgtpos.y)<0.1:
+						cardholder.position = tgtpos
+						ready+=1
+				if ready == Cardholderlist.size():
+					ReorganizeStage = 3
+			3:
+				ReorganizeCardholders = false
+				ReorganizeStage = 0
+	else:
+		if ReorganizeStage!=0:
+			pass
+			# Reshow everuting and skip animations
 
 func _set_player_data(datainfo):
 	PlayerInfo = datainfo

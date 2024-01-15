@@ -39,8 +39,6 @@ func _process(delta):
 	if Selected:
 		TargettingArrow.TargetPosition = get_local_mouse_position()
 		if SelectedType == SELECTEDTYPE.ATTACKING:
-			
-			
 			TargettingArrow.modulate = Color.RED
 			# If we are hovering someone & is not our team
 			if global.NetworkCon.playspace.HoveredCardholder != null:

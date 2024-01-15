@@ -22,6 +22,7 @@ var IsHovered:bool = false
 var SinTimer:float = 0
 var ShakeAmt:float = 0.0
 var ShakePos:Vector2
+
 # Collision Box Updates
 func _update_rect():
 	HoveringRect = Rect2(Vector2(0,0), CardSprite.get_rect().size * CardSprite.scale)

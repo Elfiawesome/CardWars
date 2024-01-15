@@ -54,9 +54,10 @@ func _Server_Player_Disconnect(socket):
 		if sock!=socket:
 			network.SendData(sock,[network.PLAYERDISCONNECT,[socket]])
 	#delete from my map
-	socket_to_instanceid[socket].queue_free()
-	socketlist.erase(socket)
-	socket_to_instanceid.erase(socket)
+	if socket_to_instanceid.has(socket):
+		socket_to_instanceid[socket].queue_free()
+		socketlist.erase(socket)
+		socket_to_instanceid.erase(socket)
 func _Server_Player_ReceiveData(socket, message):
 	var cmd = message[0]
 	var buffer = message[1]
