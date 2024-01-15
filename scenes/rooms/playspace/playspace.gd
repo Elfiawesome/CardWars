@@ -15,6 +15,7 @@ var HandCards:Array[HandCard] = []
 var SelectedHandCard:HandCard = null
 var HoveredCardholder:Card = null
 var HandCardsHide:bool = false
+var InputBlock:bool = false
 
 var SelectedAttackingCardholders:Array[Cardholder] = []
 var SelectedAbilityCardholders:Array[Cardholder] = []
@@ -26,6 +27,8 @@ func _ready():
 	get_tree().get_root().size_changed.connect(_on_window_resized)
 
 func _input(event):
+	if InputBlock:
+		return
 	if event is InputEventKey:
 		if event.pressed:
 			if event.keycode == KEY_Q:
@@ -38,7 +41,10 @@ func _input(event):
 								]
 							)
 			if event.keycode == KEY_ENTER:
-				_draw_specific_card(randi_range(1,UnitData.UNITDATA_MAX-1),0)
+				# _draw_specific_card(randi_range(1,UnitData.UNITDATA_MAX-1),0)
+				_draw_specific_card(UnitData.FanFron_ForestWalker,1)
+				_draw_specific_card(UnitData.Destiny2_Wyvern,1)
+				_draw_specific_card(UnitData.Destiny2_Psion,1)
 			if event.keycode == KEY_SPACE:
 				if global.NetworkCon.mysocket == global.NetworkCon.Turnstage[global.NetworkCon.Turn]: # Only if my turn
 					var dat:Array = []

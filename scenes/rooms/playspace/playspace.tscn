@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://cmdm4352g1sud"]
+[gd_scene load_steps=3 format=3 uid="uid://cmdm4352g1sud"]
 
 [ext_resource type="Script" path="res://scenes/rooms/playspace/playspace.gd" id="1_47jq5"]
+[ext_resource type="PackedScene" uid="uid://uxm8xs1eop4m" path="res://scenes/rooms/playspace/console_con.tscn" id="2_ar5qg"]
 
 [node name="Playspace" type="Node2D"]
 script = ExtResource("1_47jq5")
@@ -17,3 +18,5 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "Debug Text..."
 autowrap_mode = 3
+
+[node name="ConsoleCon" parent="Camera2D/CanvasLayer" instance=ExtResource("2_ar5qg")]

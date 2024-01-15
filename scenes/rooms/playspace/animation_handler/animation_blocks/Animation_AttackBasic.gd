@@ -25,8 +25,9 @@ func _animation_playing(_delta, args:Array):
 				for i in Victimarr.size():
 					#Create shake to vicitm
 					var _victim = Victimarr[i]
-					# _victim.ShakeAmt = 10
-					#Create damage numbers here also
+					_victim.ShakeAmt = 10
+					
+					# Create damage numbers here also
 					#var dmgNumobj:DamageNumberClass = load("res://scenes/game/visuals/damage_numbers.tscn").instantiate()
 					#dmgNumobj.text = str(Dmgarr[i])
 					#dmgNumobj.position = _victim.position

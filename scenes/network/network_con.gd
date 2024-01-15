@@ -188,11 +188,16 @@ func _AttackCardholder(buffer:Array):
 	var AnimationBlock = load("res://scenes/rooms/playspace/animation_handler/animation_blocks/Animation_AttackBasic.gd")
 	for cardreference in attackingmap["AttackingList"]:
 		var AttackingCardholder:Cardholder = _get_cardholder(cardreference)
-		var VictimCardholders:Array[Cardholder] = [UltimateVictimCardholder]
-		for VictimCardholder in VictimCardholders:
-			AttackingCardholder._attack_cardholder(VictimCardholder)
 		
+		var DamagedVictim:Array = AttackingCardholder._get_damaged_victims(UltimateVictimCardholder)
+		var VictimCardholders:Array[Cardholder] = DamagedVictim[0]
+		var VictimDamageTypes:Array[int] = DamagedVictim[1]
+		for i in len(VictimCardholders):
+			var VictimCardholder:Cardholder = VictimCardholders[i]
+			var VictimDamageType:int = VictimDamageTypes[i]
+			AttackingCardholder._attack_cardholder(VictimCardholder, VictimDamageType)
+			
 		playspace.AnimationHandler.AddAnimationSingleToQueue(
 			AnimationBlock.new(), [AttackingCardholder,VictimCardholders, []]
 		)
-	
+

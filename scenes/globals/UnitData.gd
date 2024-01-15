@@ -61,7 +61,7 @@ func _ready():
 	CardData[FanFron_FantasticDragon]["SpAtk"]["PierceATK"]=true
 	
 	InitUnitCard(FanFron_ForestWalker,15,5,8,"Forest Walker","",lf+"FanFron_ForestWalker.png")
-	CardData[FanFron_ForestWalker]["SpAtk"]["SplashATK"]=10
+	CardData[FanFron_ForestWalker]["SpAtk"]["SplashATK"] = 10
 	
 	InitUnitCard(GenshinImpact_AnemoboxerVanguard,10,5,9,"Anemoboxer Vanguard","",lf+"GenshinImpact_AnemoboxerVanguard.png")
 	InitUnitCard(GenshinImpact_AnemoSlime,11,5,3,"Anemo Slime","",lf+"GenshinImpact_AnemoSlime.png")

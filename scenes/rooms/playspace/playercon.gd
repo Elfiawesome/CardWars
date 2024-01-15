@@ -15,7 +15,7 @@ var PlayerInfo = {
 # Visual Variables
 var HomePos:Vector2
 # Game variables
-var Cardholderlist = []
+var Cardholderlist:Array[Cardholder] = []
 var UnitDeck:Array = []
 var SpellDeck:Array = []
 var HandCards:Array = []
@@ -36,6 +36,8 @@ func _set_player_data(datainfo):
 		HeroID = PlayerInfo["HeroCard"]
 func _get_player_data():
 	return PlayerInfo
+
+
 
 func _create_cardholders(IsEnemy:bool):
 	var cardwid = 842*0.2+20
@@ -67,6 +69,16 @@ func _create_cardholders(IsEnemy:bool):
 		cardholder.HomePos = cardholder.position
 		cardholder._update_rect()
 		cardholder.mysocket = mysocket
+
 func _get_battlefield_width()->float:
 	var cardwid:float = 842*0.2+20
 	return cardwid*(Cardholderlist.size()-1)
+
+func _get_battlefield_size()->int:
+	var _size:int = 0
+	for _cardholder in Cardholderlist:
+		if _cardholder.CardID==0:
+			continue
+		if !_cardholder._is_dead():
+			_size += 1
+	return _size
