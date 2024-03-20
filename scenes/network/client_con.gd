@@ -1,73 +1,39 @@
-extends NetworkConClass
+extends NetworkCon
 class_name ClientCon
 
-
 func _ready():
-	network = load("res://scenes/network/extension/NetworkClient.gd").new()
+	# Create NetworkNode and add it
+	network = NetworkClientNode.new()
 	add_child(network)
-
-	network._JoinServer()
+	# Join the server and connect the client's signals to the corresponding functions
 	network.Connect.connect(_Client_Player_Connected)
 	network.ReceiveData.connect(_Client_Player_ReceiveData)
+	var _err = network._JoinServer()
 
+
+# This function is called when the client connects to the server
 func _Client_Player_Connected():
 	# You can use this if you want to send a data straight to the server to INITPLAYERDATA
 	# However in this case, I asked the server to ask the connecting client for INITPLAYERDATA
 	# Mostly do that so that the server can be in control of connections fully
 	pass
-func _Client_Player_ReceiveData(message):
-	var cmd = message[0]
-	var buffer = message[1]
-	match(cmd):
-		network.PLAYERCONNECT:
-			pass
-		network.PLAYERDISCONNECT:# Handle when my fellow client has disconnected
-			if socket_to_instanceid.has(buffer[0]):
-				socket_to_instanceid[buffer[0]].IsPlaying = false
-				if RoomStage == ROOM.LOBBY:
-					socket_to_instanceid[buffer[0]].queue_free()
-					socketlist.erase(buffer[0])
-					socket_to_instanceid.erase(buffer[0])
-					_update_team_composition()
-		network.REQUESTFORPLAYERDATA:# When asked by server to give data (Actually can give mannualy by me)
-			var socket = buffer[0]
-			mysocket = socket
-			var playercon = _create_player(socket)
-			socketlist.push_back(socket)
-			socket_to_instanceid[socket] = playercon
-			playercon._set_player_data({
-				"Name":"Client",
-				"Team":randi_range(1,2),
-				"UnitDeck":[],
-				"SpellDeck":[],
-				"HeroCard":0,
-				"Title":"Client man"
-			})
-			playercon.mysocket = mysocket
-			playercon.IsLocal = true
-			# Update team comp to add myself inside it
-			_update_team_composition()
-			# tell server my data
-			network.SendData([network.REQUESTFORPLAYERDATA,[playercon._get_player_data()]])
-		network.INITPLAYERDATA:# Asked to create a player
-			var socket = buffer[0]
-			var socketdata = buffer[1]
-			
-			var playercon:PlayerCon = _create_player(socket)
-			socketlist.push_back(socket)
-			socket_to_instanceid[socket] = playercon
-			playercon._set_player_data(socketdata)
-			# Update team compo when other new players join
-			_update_team_composition()
-		network.STARTGAME:
+
+# This function is called when the client receives data from the server
+func _Client_Player_ReceiveData(message:Array):
+	var cmd:int = message[0]
+	var buffer:Array = message[1]
+	match cmd:
+		PLAYERINFO_REQUEST:
+			mysocket = buffer[0]
+			network.SendData([PLAYERINFO_REPLY, [global.PlayerSaveDict]])
+		GAME_SNAPSHOT:
+			_from_dict(buffer[0])
+		START_GAME:
 			_StartGame(buffer)
-		network.ADDCARDINTOHAND:
-			_AddCardIntoHand(buffer)
-		network.SUMMONCARD:
-			_SummonCard(buffer)
-		network.REMOVECARDFROMHAND:
-			_RemoveCardFromHand(buffer)
-		network.NEXTTURN:
-			_NextTurn(buffer)
-		network.ATTACKCARDHOLDER:
-			_AttackCardholder(buffer)
+		PLAYER_END_TURN:
+			_PlayerEndTurn(buffer)
+		PLAYER_ADD_HANDCARD:
+			pass
+		PLAYER_REMOVE_HANDCARD:
+			pass
+

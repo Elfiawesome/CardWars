@@ -1,0 +1,28 @@
+[gd_scene load_steps=4 format=3 uid="uid://c8kkq76pavmn1"]
+
+[ext_resource type="Script" path="res://scenes/rooms/rm_playspace/game_objects/cards/hand_card.gd" id="1_meepp"]
+[ext_resource type="Texture2D" uid="uid://blm2fpt6m33hh" path="res://assets/textures/card_back/CardBack_Unit.png" id="2_cb608"]
+[ext_resource type="Texture2D" uid="uid://dlgkqjbu5poqn" path="res://assets/textures/card_misc/CardholderDefault.png" id="2_wxqjm"]
+
+[node name="HandCard" type="Node2D"]
+scale = Vector2(0.4, 0.4)
+script = ExtResource("1_meepp")
+
+[node name="BackCard" type="Sprite2D" parent="."]
+texture = ExtResource("2_cb608")
+
+[node name="CharacterCard" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("2_wxqjm")
+
+[node name="ControlCollisionBox" type="Control" parent="CharacterCard"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -434.0
+offset_top = -649.0
+offset_right = -434.0
+offset_bottom = -649.0
+grow_horizontal = 2
+grow_vertical = 2

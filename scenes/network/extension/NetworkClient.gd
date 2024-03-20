@@ -52,13 +52,11 @@ func _process(_delta):
 			FailureInConnection()
 		
 		#Check for incoming packets
-		if myclientdata.peer.get_available_packet_count()>0:
+		while(myclientdata.peer.get_available_packet_count()>0):
 			var data_received = myclientdata.peer.get_var()
-			print("CLIENT: received data " + str(MsgDetailedDescription[data_received[0]] +": "+ str(data_received[1])))
+			# print("CLIENT: received data " + str(MsgDetailedDescription[data_received[0]] +": "+ str(data_received[1])))
 			emit_signal("ReceiveData",data_received)
-		
-#		if Input.is_action_just_pressed("ui_up"): #Test packet
-#			SendData("hi server")
+
 
 func FailureInConnection():
 	if myclientdata!=null:

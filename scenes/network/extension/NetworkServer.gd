@@ -44,14 +44,10 @@ func _process(_delta):
 			emit_signal("Disconnect",key)
 			continue #Skip this one and move to the next
 		#Check for receiving data
-		if _peer.get_available_packet_count() > 0:
+		while(_peer.get_available_packet_count() > 0):
 			var data_received = _peer.get_var()
-			print("SERVER: received data "+str(MsgDetailedDescription[data_received[0]] +": "+ str(data_received[1])))
+			# print("SERVER: received data "+str(MsgDetailedDescription[data_received[0]] +": "+ str(data_received[1])))
 			emit_signal("ReceiveData",key,data_received)
-	
-#	if Input.is_action_just_pressed("ui_up"): #Test packet
-#		for key in client_datas:
-#			SendData(client_datas[key].connection,"HELLO THEERE")
 
 func SendData(connectionID,message):
 	if client_datas.has(connectionID):

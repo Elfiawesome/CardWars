@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3 uid="uid://b1cuvyhar5l7t"]
+
+[ext_resource type="Script" path="res://scenes/rooms/rm_playspace/game_objects/cards/cardholder.gd" id="1_tcg3r"]
+[ext_resource type="Texture2D" uid="uid://dlgkqjbu5poqn" path="res://assets/textures/card_misc/CardholderDefault.png" id="2_8acug"]
+
+[node name="Cardholder" type="Node2D"]
+scale = Vector2(0.2, 0.2)
+script = ExtResource("1_tcg3r")
+
+[node name="CharacterSprite" type="Sprite2D" parent="."]
+texture = ExtResource("2_8acug")
+
+[node name="ControlCollisionBox" type="Control" parent="CharacterSprite"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -434.0
+offset_top = -649.0
+offset_right = -434.0
+offset_bottom = -649.0
+grow_horizontal = 2
+grow_vertical = 2

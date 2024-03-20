@@ -1,5 +1,10 @@
 extends Node
 class_name globalclass
 
-# Storing global informations
-var NetworkCon:NetworkConClass
+var CurrentRoom:Room
+
+var PlayerSaveDict:Dictionary = {
+	"Name":"Elfiawesome",
+	"Title":"Owner",
+	"PreferedTeam":1
+}

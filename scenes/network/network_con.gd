@@ -1,211 +1,189 @@
 extends Node
-class_name NetworkConClass
+class_name NetworkCon
 
-#Network Variables
-var network:NetworkNode
-var playspace:Playspace
-var socket_to_instanceid = {}
-var socketlist = []
-var mysocket = -1
-var IsServer = false
-# Game variables
-var GameSettings = {"Gamemode":0,"TeamComposition":{}}
-var Turnstage:Array = []
+# Local Objects
+var network:NetworkNode # Network Obejct used to connect, received data etc...
+var playspace:Playspace # Reference to the current Playspace (ie my parent node)
+var IsServer:bool = false # Whether I'm the server or a client
+var mysocket:int # MY local socket
+
+enum {
+	# Description:
+	# Client: Received as Client
+	# Server: Received as Server
+	
+	# Not used right now!
+	BROADCAST_PLAYER_CONNECTING, # To Tell everyone that someone is connecting
+	BROADCAST_PLAYER_DISCONNECTING, # To Tell everyone that someone is connecting
+	
+	PLAYER_DISCONNECTED,
+	
+	PLAYER_CONNECTED,
+	
+	
+	PLAYERINFO_REQUEST,
+	# Client: When joining server, the server will promt us with this packet
+	
+	PLAYERINFO_REPLY, #[{PlayerData}]
+	# Server: Receives back info from connecting player
+	
+	JOIN_ACCEPT,
+	# Client: gets the mysocket from this
+	
+	GAME_SNAPSHOT,
+	# Client: Receives the state of the current game
+	
+	START_GAME,
+	# Client: Initaites the game
+	
+	PLAYER_END_TURN,
+	# Client: A plyr had just ended his turn
+	
+	PLAYER_ADD_HANDCARD,
+	
+	PLAYER_REMOVE_HANDCARD,
+	
+	CHANGE_TURNORDER,
+	# Client: Changes TurnOrder
+}
+
+# Object Referencing
+var socket_to_instanceid:Dictionary = {}
+var ability_objects:Dictionary = {}
+
+# Game Variables
+var GameSettings:Dictionary = {"Gamemode":0}
+var TurnOrder:Array = [] #Array[socket of each player]
+var GameStage:int = PLAYERTURNS
 var Turn:int = 0
 enum {
-	PLAYERTURN = 0,
+	PLAYERTURNS,
 	ATTACKINGTURN
 }
-enum ROOM {
-	LOBBY,
-	GAME
-}
-var GameStage:int = PLAYERTURN
-var RoomStage:int = ROOM.LOBBY
-var UnitIdentifier = 0
-var SpellIdentifier = 0
-var HandCardIndentifier = 0
-
-func _create_player(socket:int) -> PlayerCon:
-	var _inst:PlayerCon = load("res://scenes/rooms/playspace/playercon.tscn").instantiate()
-	_inst.mysocket = socket
-	add_child(_inst)
-	return _inst
-func _is_local_turn() -> bool:
-	if Turnstage.is_empty():
-		return false
-	return (Turnstage[Turn] == mysocket)
-func _get_team(socket):
-	return socket_to_instanceid[socket].PlayerInfo["Team"]
-func _get_cardholder(reference:Array):
-	if reference[0]==0:
-		return socket_to_instanceid[reference[1]].Cardholderlist[reference[2]]
-
-func _svrREQUESTFORPLAYERDATA(_socket:int, _buffer:Array):
-	# Not sure what this does?
-	pass
-
-func _svrStartGame(_socket:int, _buffer:Array):
-	pass
-func _StartGame(buffer:Array):
-	var _GameSettings = buffer[0]
-	GameSettings["TeamComposition"] = _GameSettings["TeamComposition"]
-	
-	#Arrange cards
-	var CurEnemySeperation:float = 0.0
-	var CurAlliesSeperation:float = 0.0
-	
-	var FirstEnemySeperation:float = 0.0
-	var _IsFirstEnemy:bool=true
-	var FirstAlliesSeperation:float = 0.0
-	var _IsFirstAllies:bool=true
-	
-	var IsFirstMinMaxCam:bool = true
-	
-	for team in GameSettings["TeamComposition"]:
-		for sock in GameSettings["TeamComposition"][team]:
-			var playercon:PlayerCon = socket_to_instanceid[sock]
-			if team == _get_team(mysocket):
-				playercon._create_cardholders(false)
-				playercon.position.x = CurAlliesSeperation
-				playercon.position.y+=300
-				CurAlliesSeperation += playercon._get_battlefield_width()+20
-				if _IsFirstAllies:
-					FirstAlliesSeperation = CurAlliesSeperation
-					_IsFirstAllies=false
-			else:
-				playercon._create_cardholders(true)
-				playercon.position.x = CurEnemySeperation
-				playercon.position.y-=300
-				CurEnemySeperation += playercon._get_battlefield_width()+20
-				if _IsFirstEnemy:
-					FirstEnemySeperation = CurEnemySeperation
-					_IsFirstEnemy=false
-			
-			if IsFirstMinMaxCam:
-				IsFirstMinMaxCam=false
-				playspace.MinCamOff = playercon.position + Vector2(-playercon._get_battlefield_width()/2,-500)
-				playspace.MaxCamOff = playercon.position + Vector2(playercon._get_battlefield_width()/2,500)
-			if (playercon.position.x - playercon._get_battlefield_width()/2)<playspace.MinCamOff.x:
-				playspace.MinCamOff.x = (playercon.position.x - playercon._get_battlefield_width()/2)
-			if (playercon.position.x + playercon._get_battlefield_width()/2)<playspace.MaxCamOff.x:
-				playspace.MaxCamOff.x = (playercon.position.x + playercon._get_battlefield_width()/2)
-			if (playercon.position.y - 500)<playspace.MinCamOff.y:
-				playspace.MinCamOff.y = (playercon.position.y - 500)
-			if (playercon.position.y + 500)>playspace.MaxCamOff.y:
-				playspace.MaxCamOff.y = (playercon.position.y + 500)
-	for team in GameSettings["TeamComposition"]:
-		for sock in GameSettings["TeamComposition"][team]:
-			var playercon:PlayerCon = socket_to_instanceid[sock]
-			if team == _get_team(mysocket):
-				playercon.position.x -= (CurAlliesSeperation-FirstAlliesSeperation)/2
-			else:
-				playercon.position.x -= (CurEnemySeperation-FirstEnemySeperation)/2
-	# Initialize the turns
-	_update_turnstage()
-	
-	# Initalize camera focus
-	playspace.CameraFocus = socket_to_instanceid[Turnstage[Turn]]
-	playspace.CameraFocusNo = Turn
-	
-	# Game has started
-	RoomStage = ROOM.GAME
-func _update_turnstage():
-	Turnstage.clear()
-	for team in GameSettings["TeamComposition"]:
-		for sock in GameSettings["TeamComposition"][team]:
-			Turnstage.push_back(sock)
-func _update_team_composition():
-	var TeamComposition:Dictionary = GameSettings["TeamComposition"]
-	TeamComposition.clear()
-	for sock in socketlist:
-		var _t = _get_team(sock)
-		if TeamComposition.has(_t):
-			TeamComposition[_t].push_back(sock)
+func _set_TurnOrder():
+	TurnOrder.clear()
+	var composition:Dictionary = {}
+	for sock in socket_to_instanceid:
+		var playerCon:PlayerCon = socket_to_instanceid[sock]
+		if composition.has(playerCon.Team):
+			composition[playerCon.Team].push_back(sock)
 		else:
-			TeamComposition[_t] = [sock]
+			composition[playerCon.Team] = [sock]
+	for team in composition:
+		for sock in composition[team]:
+			TurnOrder.push_back(sock)
+func _svrStartGame(buffer):
+	_StartGame(buffer)
+	_relay_to_sockets(START_GAME, buffer)
+func _StartGame(buffer):
+	print(str(mysocket)+": Starting server")
+	# Set turnorder
+	TurnOrder = buffer[0]["TurnOrder"]
+	Turn = 0
+	
+	# Set Players position and camera min max
+	var playercon:PlayerCon
+	var min:Vector2
+	var max:Vector2
+	
+	# Initialize the battlefield (ie create the cardholders for each playercon) and
+	# Retreive the totalwidth for the enemy team's side and my team side
+	var player_totalwidth:float = 0
+	var enemy_totalwidth:float = 0
+	for sock in socket_to_instanceid:
+		playercon = socket_to_instanceid[sock]
+		playercon._initialize_battlefield()
+		if playercon._is_local_team():
+			player_totalwidth += playercon._battlefield_dimensions().x
+		else:
+			enemy_totalwidth += playercon._battlefield_dimensions().x
+	
+	var player_curwidth:float = 0
+	var enemy_curwidth:float = 0
+	for sock in socket_to_instanceid:
+		playercon = socket_to_instanceid[sock]
+		if playercon._is_local_team():
+			playercon.home_position.x = -player_totalwidth/2 + player_curwidth
+			playercon.home_position.y = 210
+			player_curwidth += playercon._battlefield_dimensions().x
+		else:
+			playercon.home_position.x = -enemy_totalwidth/2 + enemy_curwidth
+			playercon.home_position.y = -210
+			enemy_curwidth += playercon._battlefield_dimensions().x
+		playercon._update_position()
+		
+		min.x = min(min.x, playercon.home_position.x - playercon._battlefield_dimensions().x)
+		min.y = min(min.y, playercon.home_position.y - playercon._battlefield_dimensions().y)
+		max.x = max(max.x, playercon.home_position.x + playercon._battlefield_dimensions().x)
+		max.y = max(max.y, playercon.home_position.y + playercon._battlefield_dimensions().y)
+	playspace.BattlefieldCameraNode.MinCamOff = min
+	playspace.BattlefieldCameraNode.MaxCamOff = max
 
-
-func _svrNextTurn(_socket:int, buffer:Array):
-	_NextTurn(buffer)
-	for sock in socketlist:
-		network.SendData(sock,[network.NEXTTURN,buffer])
-func _NextTurn(_buffer):
-	if Turn<(Turnstage.size()-1):
+func _svrPlayerEndTurn(_socket:int, buffer:Array):
+	_PlayerEndTurn(buffer)
+	_relay_to_sockets(PLAYER_END_TURN, buffer)
+func _PlayerEndTurn(_buffer:Array):
+	if Turn<(TurnOrder.size()-1):
 		Turn+=1
 	else:
 		Turn = 0
-		if GameStage==PLAYERTURN:
-			GameStage=ATTACKINGTURN
+		if GameStage == PLAYERTURNS:
+			GameStage = ATTACKINGTURN
 		else:
 			# End turn stuff here
-			GameStage=PLAYERTURN
+			GameStage = PLAYERTURNS
 	# Reset Camera Offset
-	playspace.CameraOffset*=0
-	playspace.CameraFocusNo = Turn
+	playspace.BattlefieldCameraNode.CameraOffset*=0
+	playspace.BattlefieldCameraNode.CameraFocusNo = Turn
 
-func _svrAddCardIntoHand(_socket:int, buffer:Array):
-	_AddCardIntoHand(buffer)
-	for sock in socketlist:
-		network.SendData(sock,[network.ADDCARDINTOHAND,buffer])
-func _AddCardIntoHand(buffer:Array):
-	var socket = buffer[0]
-	var CardID = buffer[1]
-	var Type = buffer[2]
-	var _Identifier = HandCardIndentifier#buffer[3]
-	var _Data = buffer[4]
+
+func _relay_to_sockets(cmd:int, buffer:Array):
+	for sock in socket_to_instanceid:
+		network.SendData(sock,[cmd,buffer])
+
+# Serialization
+func _to_dict()->Dictionary:
+	var dict:Dictionary = {}
 	
-	socket_to_instanceid[socket].HandCards.append(buffer)
-	if socket==mysocket:
-		playspace._addcardintohand(CardID, Type)
-	HandCardIndentifier+=1
-
-func _svrSummonCard(_socket:int, buffer:Array):
-	_SummonCard(buffer)
-	for sock in socketlist:
-		network.SendData(sock,[network.SUMMONCARD,buffer])
-func _SummonCard(buffer):
-	var socket = buffer[0]
-	var pos = buffer[1]
-	var cardid = buffer[2]
-	var dat = buffer[3]
-	socket_to_instanceid[socket].Cardholderlist[pos]._summon_card(cardid,dat)
-	UnitIdentifier+=1
-
-func _svrRemoveCardFromHand(_socket:int, buffer:Array):
-	_RemoveCardFromHand(buffer)
-	for sock in socketlist:
-		network.SendData(sock,[network.REMOVECARDFROMHAND,buffer])
-func _RemoveCardFromHand(buffer):
-	var socket = buffer[0]
-	var handcardpos = buffer[1]
+	# 1. Serialize Players
+	var players_dict:Dictionary = {}
+	for socket in socket_to_instanceid:
+		var _inst:PlayerCon = socket_to_instanceid[socket]
+		players_dict[socket] = _inst._to_dict()
+	dict["playercon"] = players_dict
 	
-	socket_to_instanceid[socket].HandCards.remove_at(handcardpos)
-	if socket==mysocket:
-		playspace._remove_specific_card(handcardpos)
-
-
-func _svrAttackCardholder(_socket:int, buffer:Array):
-	_AttackCardholder(buffer)
-	for sock in socketlist:
-		if sock!=_socket:
-			network.SendData(sock,[network.ATTACKCARDHOLDER,buffer])
-func _AttackCardholder(buffer:Array):
-	var attackingmap = buffer[0]
-	var UltimateVictimCardholder:Cardholder = _get_cardholder(attackingmap["Victim"])
-	var AnimationBlock = load("res://scenes/rooms/playspace/animation_handler/animation_blocks/Animation_AttackBasic.gd")
-	for cardreference in attackingmap["AttackingList"]:
-		var AttackingCardholder:Cardholder = _get_cardholder(cardreference)
-		
-		var DamagedVictim:Array = AttackingCardholder._get_damaged_victims(UltimateVictimCardholder)
-		var VictimCardholders:Array[Cardholder] = DamagedVictim[0]
-		var VictimDamageTypes:Array[int] = DamagedVictim[1]
-		for i in len(VictimCardholders):
-			var VictimCardholder:Cardholder = VictimCardholders[i]
-			var VictimDamageType:int = VictimDamageTypes[i]
-			AttackingCardholder._attack_cardholder(VictimCardholder, VictimDamageType)
-			
-		playspace.AnimationHandler.AddAnimationSingleToQueue(
-			AnimationBlock.new(), [AttackingCardholder,VictimCardholders, []]
-		)
-
+	# 2. Serialize Abilities
+	
+	# 3. Serialize GameState
+	dict["GameSettings"] = GameSettings
+	dict["GameStage"] = GameStage
+	dict["TurnOrder"] = TurnOrder
+	dict["Turn"] = Turn
+	
+	# 4. Serialize Playspace
+	dict["playspace"] = playspace._to_dict()
+	
+	return dict
+func _from_dict(dict:Dictionary):
+	
+	# 1. deserialize Players
+	# If there is a plyer who disconnected, it will not delete the playercon. Idk if should change that
+	for socket in dict["playercon"]:
+		if socket_to_instanceid.has(socket):
+			socket_to_instanceid[socket]._from_dict(dict["playercon"][socket])
+		else:
+			socket_to_instanceid[socket] = playspace._create_player(socket)
+			socket_to_instanceid[socket]._from_dict(dict["playercon"][socket])
+	
+	# 2. Serialize Abilities
+	
+	# 3. Serialize GameState
+	GameSettings = dict["GameSettings"]
+	GameStage = dict["GameStage"]
+	TurnOrder = []
+	for turn in dict["TurnOrder"]:
+		TurnOrder.push_back(turn)
+	Turn = dict["Turn"]
+	
+	# 4. deserialize Playspace
+	playspace._from_dict(dict["playspace"])
