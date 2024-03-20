@@ -41,10 +41,10 @@ func _input(event):
 								]
 							)
 			if event.keycode == KEY_ENTER:
-				# _draw_specific_card(randi_range(1,UnitData.UNITDATA_MAX-1),0)
-				_draw_specific_card(UnitData.FanFron_ForestWalker,1)
-				_draw_specific_card(UnitData.Destiny2_Wyvern,1)
-				_draw_specific_card(UnitData.Destiny2_Psion,1)
+				_draw_specific_card(randi_range(1,UnitData.UNITDATA_MAX-1),0)
+				# _draw_specific_card(UnitData.FanFron_ForestWalker,1)
+				# _draw_specific_card(UnitData.Destiny2_Wyvern,1)
+				# _draw_specific_card(UnitData.Destiny2_Psion,1)
 			if event.keycode == KEY_SPACE:
 				if global.NetworkCon.mysocket == global.NetworkCon.Turnstage[global.NetworkCon.Turn]: # Only if my turn
 					var dat:Array = []
@@ -76,7 +76,7 @@ func _manage_debuglabel():
 	for sock in global.NetworkCon.socketlist:
 		if global.NetworkCon.socket_to_instanceid[sock].IsInitialized:
 			var _playerinfo = global.NetworkCon.socket_to_instanceid[sock].PlayerInfo
-			debugtext.text+="["+str(sock)+"] "+_playerinfo["Name"]+"("+_playerinfo["Title"]+")"+" T:"+str(_playerinfo["Team"])+ " "+str(global.NetworkCon.socket_to_instanceid[sock])+ "\n"
+			debugtext.text+="["+str(sock)+"] "+_playerinfo["Name"]+"("+_playerinfo["Title"]+")"+" T:"+str(global.NetworkCon._get_team(sock))+ " "+str(global.NetworkCon.socket_to_instanceid[sock])+ "\n"
 			debugtext.text+=" > "
 			for item in global.NetworkCon.socket_to_instanceid[sock].HandCards:
 				debugtext.text += str(UnitData.CardData[item[1]]["Name"]) + " | "

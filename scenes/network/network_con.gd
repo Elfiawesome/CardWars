@@ -16,7 +16,12 @@ enum {
 	PLAYERTURN = 0,
 	ATTACKINGTURN
 }
+enum ROOM {
+	LOBBY,
+	GAME
+}
 var GameStage:int = PLAYERTURN
+var RoomStage:int = ROOM.LOBBY
 var UnitIdentifier = 0
 var SpellIdentifier = 0
 var HandCardIndentifier = 0
@@ -60,7 +65,7 @@ func _StartGame(buffer:Array):
 	for team in GameSettings["TeamComposition"]:
 		for sock in GameSettings["TeamComposition"][team]:
 			var playercon:PlayerCon = socket_to_instanceid[sock]
-			if team == socket_to_instanceid[mysocket].PlayerInfo["Team"]:
+			if team == _get_team(mysocket):
 				playercon._create_cardholders(false)
 				playercon.position.x = CurAlliesSeperation
 				playercon.position.y+=300
@@ -92,7 +97,7 @@ func _StartGame(buffer:Array):
 	for team in GameSettings["TeamComposition"]:
 		for sock in GameSettings["TeamComposition"][team]:
 			var playercon:PlayerCon = socket_to_instanceid[sock]
-			if team == socket_to_instanceid[mysocket].PlayerInfo["Team"]:
+			if team == _get_team(mysocket):
 				playercon.position.x -= (CurAlliesSeperation-FirstAlliesSeperation)/2
 			else:
 				playercon.position.x -= (CurEnemySeperation-FirstEnemySeperation)/2
@@ -102,6 +107,9 @@ func _StartGame(buffer:Array):
 	# Initalize camera focus
 	playspace.CameraFocus = socket_to_instanceid[Turnstage[Turn]]
 	playspace.CameraFocusNo = Turn
+	
+	# Game has started
+	RoomStage = ROOM.GAME
 func _update_turnstage():
 	Turnstage.clear()
 	for team in GameSettings["TeamComposition"]:
@@ -111,7 +119,7 @@ func _update_team_composition():
 	var TeamComposition:Dictionary = GameSettings["TeamComposition"]
 	TeamComposition.clear()
 	for sock in socketlist:
-		var _t = socket_to_instanceid[sock].PlayerInfo["Team"]
+		var _t = _get_team(sock)
 		if TeamComposition.has(_t):
 			TeamComposition[_t].push_back(sock)
 		else:
@@ -122,7 +130,7 @@ func _svrNextTurn(_socket:int, buffer:Array):
 	_NextTurn(buffer)
 	for sock in socketlist:
 		network.SendData(sock,[network.NEXTTURN,buffer])
-func _NextTurn(buffer):
+func _NextTurn(_buffer):
 	if Turn<(Turnstage.size()-1):
 		Turn+=1
 	else:

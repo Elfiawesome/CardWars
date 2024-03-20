@@ -4,11 +4,12 @@ class_name PlayerCon
 var mysocket = 0
 var IsLocal = false
 var IsInitialized = false
+var IsPlaying:bool = true
 var PlayerInfo = {
 	"Name":"Default Name",
 	"Team":0,
-	"UnitDeck":[],
-	"SpellDeck":[],
+	"UnitDeck":[], # This is only to show the deck that u have as of start of the game,
+	"SpellDeck":[],# Only Variables that don't change can be added here, anything else goes below
 	"HeroCard":0,
 	"Title":"Default Title"
 }
@@ -33,24 +34,24 @@ func _process(_delta):
 		match ReorganizeStage:
 			1:
 				var tgtpos:Vector2 = Vector2(0,0)
-				var ready:int = 0
+				var all_ready:int = 0
 				for cardholder in Cardholderlist:
 					cardholder.position = lerp(cardholder.position, tgtpos, blend)
 					if abs(cardholder.position.x-tgtpos.x)<0.1 && abs(cardholder.position.y-tgtpos.y)<0.1:
 						cardholder.position = tgtpos
-						ready+=1
-				if ready == Cardholderlist.size():
+						all_ready+=1
+				if all_ready == Cardholderlist.size():
 					ReorganizeStage = 2
 			2:
 				var tgtpos:Vector2
-				var ready:int = 0
+				var all_ready:int = 0
 				for cardholder in Cardholderlist:
 					tgtpos = cardholder.HomePos
 					cardholder.position = lerp(cardholder.position, tgtpos, blend)
 					if abs(cardholder.position.x-tgtpos.x)<0.1 && abs(cardholder.position.y-tgtpos.y)<0.1:
 						cardholder.position = tgtpos
-						ready+=1
-				if ready == Cardholderlist.size():
+						all_ready+=1
+				if all_ready == Cardholderlist.size():
 					ReorganizeStage = 3
 			3:
 				ReorganizeCardholders = false

@@ -22,9 +22,13 @@ func _Client_Player_ReceiveData(message):
 		network.PLAYERCONNECT:
 			pass
 		network.PLAYERDISCONNECT:# Handle when my fellow client has disconnected
-			socket_to_instanceid[buffer[0]].queue_free()
-			socketlist.erase(buffer[0])
-			socket_to_instanceid.erase(buffer[0])
+			if socket_to_instanceid.has(buffer[0]):
+				socket_to_instanceid[buffer[0]].IsPlaying = false
+				if RoomStage == ROOM.LOBBY:
+					socket_to_instanceid[buffer[0]].queue_free()
+					socketlist.erase(buffer[0])
+					socket_to_instanceid.erase(buffer[0])
+					_update_team_composition()
 		network.REQUESTFORPLAYERDATA:# When asked by server to give data (Actually can give mannualy by me)
 			var socket = buffer[0]
 			mysocket = socket

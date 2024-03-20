@@ -55,9 +55,12 @@ func _Server_Player_Disconnect(socket):
 			network.SendData(sock,[network.PLAYERDISCONNECT,[socket]])
 	#delete from my map
 	if socket_to_instanceid.has(socket):
-		socket_to_instanceid[socket].queue_free()
-		socketlist.erase(socket)
-		socket_to_instanceid.erase(socket)
+		socket_to_instanceid[socket].IsPlaying = false
+		if RoomStage == ROOM.LOBBY:
+			socket_to_instanceid[socket].queue_free()
+			socketlist.erase(socket)
+			socket_to_instanceid.erase(socket)
+			_update_team_composition()
 func _Server_Player_ReceiveData(socket, message):
 	var cmd = message[0]
 	var buffer = message[1]
@@ -85,4 +88,4 @@ func _Server_Player_ReceiveData(socket, message):
 		network.NEXTTURN:
 			_svrNextTurn(socket, buffer)
 		network.ATTACKCARDHOLDER:
-			_svrREQUESTFORPLAYERDATA(socket, buffer)
+			_svrAttackCardholder(socket, buffer)

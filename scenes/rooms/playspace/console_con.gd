@@ -132,7 +132,7 @@ func _input(event):
 				StartSimilarCommands = false
 
 
-func _process(delta):
+func _process(_delta):
 	CommandText.grab_focus()
 	
 	# Animation

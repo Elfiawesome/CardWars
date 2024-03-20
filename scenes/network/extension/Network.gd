@@ -5,10 +5,22 @@ var Port = 6503
 var Address = "127.0.0.1"
 
 enum{
+	# Client: Received as Client
+	# Server: Received as Server
+	
 	PLAYERCONNECT,
+	# Client: When a player connects into the server
+	# Server: NIL
+	
 	PLAYERDISCONNECT,
-	REQUESTFORPLAYERDATA,
-	INITPLAYERDATA,
+	# Client: When a player disconnects into the server
+	# Server: NIL
+	
+	REQUESTFORPLAYERDATA, 
+	# Client: When I'm asked by the server to tell it my information. At the same time, I will instantsiate myself own player locally with that information
+	# Server: When the Client sends me back information of itself, at which I will create that client and tell all other clients to create him
+	
+	INITPLAYERDATA, # When I am told to instantsiate a player 
 	UPDATEGAMESETTINGS,
 	STARTGAME,
 	ADDCARDINTOHAND,

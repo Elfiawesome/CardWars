@@ -84,8 +84,9 @@ func _on_CollisionBox_gui_input(event:InputEvent):
 					# Can only select if its my untis
 					if mysocket == global.NetworkCon.mysocket:
 						if global.NetworkCon.playspace.SelectedAttackingCardholders.find(self) == -1:
-							_attack_selected()
-							global.NetworkCon.playspace.SelectedAttackingCardholders.append(self)
+							if _can_attack():
+								_attack_selected()
+								global.NetworkCon.playspace.SelectedAttackingCardholders.append(self)
 						else:
 							_attack_deselected()
 							global.NetworkCon.playspace.SelectedAttackingCardholders.erase(self)
@@ -210,8 +211,8 @@ func _summon_card(cardID:int, _data:Dictionary):
 				"AbilityType":_AbilityData["Type"],
 				"Ability":_AbilityData["Path"],
 				"Completed":false,
-				"Cooldown":0,
-				"CooldownMax":0
+				"Cooldown":0,		# Extra ability items can be plotted under some other sub category
+				"CooldownMax":0 	# Only Essentials are stored such as Cooldown
 			}
 			Stats["Ability"].push_back(_d)
 	
@@ -220,6 +221,7 @@ func _summon_card(cardID:int, _data:Dictionary):
 
 func _attack_cardholder(cardholder:Cardholder, DamageType:int):
 	if cardholder.CardID!=0:
+		# Get base damage from the type of dmg (whether it be NORMAL, SPLASH or CRIT
 		var basedmg:int 
 		match DamageType:
 			DAMAGETYPE.NORMAL:
@@ -228,20 +230,22 @@ func _attack_cardholder(cardholder:Cardholder, DamageType:int):
 				basedmg = _get_stacked_number(Stats["SplashATK"])
 			DAMAGETYPE.CRITICAL:
 				basedmg = _get_stacked_number(Stats["Atk"])
-			
+		
+		# Manipulate our damaget by damage output multiplier
+		# Fancy maths here
 		
 		cardholder._take_damage(basedmg)
 		cardholder._update_visuals()
 		Stats["AtkLeft"]-=1
 
 func _take_damage(dmgamount:int):
+	# Here we will multiply the damage by our damage intake multiplier
 	_reduce_stack_number(
 			Stats["Hp"],
 			dmgamount
 		)
 
-func _heal(cardholder:Card, overhealamt:int):
-#	print("HEALING STARTED! ("+str(overhealamt)+")")
+func _heal(_cardholder:Card, overhealamt:int):
 	_add_stack_number(Stats["Hp"], overhealamt)
 	_update_visuals()
 
@@ -305,8 +309,8 @@ func _has_SPAtk(SPAtkType:String) -> bool:
 		if !Stats[SPAtkType].is_empty():
 			return true
 	return false
-func _get_damaged_victims(Victim:Cardholder):
-	var VictimArr:Array[Cardholder]
+func _get_damaged_victims(Victim:Cardholder)->Array[Array]:
+	var VictimArr:Array[Cardholder] = []
 	var DmgTypeArr:Array[int] = []
 	var VictimCon:PlayerCon = global.NetworkCon.socket_to_instanceid[Victim.mysocket]
 	
