@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://cp5df1ye1c2d2"]
+
+[ext_resource type="Texture2D" uid="uid://cjtk0hxjvhb54" path="res://icon.svg" id="1_chue6"]
+[ext_resource type="Script" path="res://scenes/game_session/game_objects/avatar.gd" id="1_g8v4x"]
+
+[node name="Avatar" type="Node2D"]
+script = ExtResource("1_g8v4x")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_chue6")

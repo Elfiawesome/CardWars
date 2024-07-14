@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3 uid="uid://4k4fmnid7f6m"]
+
+[ext_resource type="Script" path="res://scenes/testing_3d_zone/testing_3d_zone.gd" id="1_siyhe"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_serev"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="Sky_6p1a2"]
+sky_material = SubResource("ProceduralSkyMaterial_serev")
+
+[sub_resource type="Environment" id="Environment_egip3"]
+background_mode = 2
+sky = SubResource("Sky_6p1a2")
+tonemap_mode = 2
+glow_enabled = true
+
+[node name="Testing3DZone" type="Node3D"]
+script = ExtResource("1_siyhe")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_egip3")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.630676, -0.633361, 0.448444, 0, 0.577858, 0.816138, -0.776046, 0.514718, -0.364441, 0, 0, 0)
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="."]

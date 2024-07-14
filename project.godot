@@ -10,20 +10,16 @@ config_version=5
 
 [application]
 
-config/name="CardWars2024"
-run/main_scene="res://scenes/main_con.tscn"
+config/name="Card Wars"
+run/main_scene="res://scenes/room_manager.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
-config/icon="res://cardwars_icon.png"
+boot_splash/show_image=false
+config/icon="res://icon.svg"
 
 [autoload]
 
-global="*res://scenes/global.gd"
-UnitData="*res://assets/Database/UnitData.gd"
+global="*res://scripts/global/global.gd"
 
-[input]
+[debug]
 
-drag={
-"deadzone": 0.5,
-"events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":0,"position":Vector2(0, 0),"global_position":Vector2(0, 0),"factor":1.0,"button_index":1,"canceled":false,"pressed":false,"double_click":false,"script":null)
-]
-}
+gdscript/warnings/untyped_declaration=2

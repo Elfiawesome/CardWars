@@ -1,4 +1,6 @@
-extends Node2D
-class_name Room
+class_name Room extends Node
 
-var maincon:MainCon
+signal change_room(room_index:int)
+
+func _on_room_changed(_new_room:Room) -> void:
+	queue_free()
