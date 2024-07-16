@@ -3,7 +3,9 @@ class_name ObjectHandler extends Object
 var root_spawn:Node
 
 var objects:Dictionary = {}
+
 var object_types:Dictionary = {}
+var serializer:Serializer = Serializer.new()
 
 func _init() -> void:
 	register_object_type("level", Level)
@@ -44,7 +46,7 @@ func destroy_object(object_id:int) -> void:
 			if is_instance_valid(object_to_remove):
 				object_to_remove.queue_free()
 		elif object_to_remove is Object:
-			object_to_remove.free() 
+			object_to_remove.free()
 		objects.erase(object_id)
 
 
@@ -82,7 +84,7 @@ func to_dict() -> Dictionary:
 		var object:Object = objects[object_id]
 		if object is Level:
 			levels[object_id] = {
-				"data": object.to_dict(),
+				"data": serializer.serialize_object(object),
 				"parent": _get_object_parent_id(object)
 			}
 	data["levels"] = levels
@@ -99,19 +101,29 @@ func _get_object_parent_id(object:Object) -> int:
 
 func from_dict(data:Dictionary) -> void:
 	var objects_to_remove:Array = objects.keys()
-	#for object_id:int in data:
-		#var object_data:Dictionary = data[object_id]
-		#if objects.has(object_id):
-			## 1. If object already exists
-			#var existing_object:Object = objects[object_id]
-	for level_id:int in data["levels"]:
-		var level_data:Dictionary = data["levels"][level_id]
-		var new_level:Level = create_object(level_data["data"]["id"], level_data["data"]["type"])
-		_add_object_to_parent(level_data["parent"], new_level)
-	for avatar_id:int in data["avatar"]:
-		var avatar_data:Dictionary = data["avatar"][avatar_id]
-		var new_avatar:Level = create_object(avatar_data["data"]["id"], avatar_data["data"]["type"])
-		_add_object_to_parent(avatar_data["parent"], new_avatar)
+	for object_id:int in data["Levels"]:
+		var object_data:Dictionary = data["Levels"][object_id]
+		if objects.has(object_id):
+			# 1. If object already exists
+			var existing_object:Object = objects[object_id]
+			serializer.deserialize_object(existing_object, object_data)
+			objects_to_remove.erase(object_id)
+		else:
+			# 2. If objcet does not exist
+			var new_object:Object = create_object(object_data["id"], object_data["type"])
+			serializer.deserialize_object(new_object, object_data)
+			objects_to_remove.erase(object_id)
+	
+	for object_id:int in objects_to_remove:
+		destroy_object(object_id)
+	#for level_id:int in data["levels"]:
+		#var level_data:Dictionary = data["levels"][level_id]
+		#var new_level:Level = create_object(level_data["data"]["id"], level_data["data"]["type"])
+		#_add_object_to_parent(level_data["parent"], new_level)
+	#for avatar_id:int in data["avatar"]:
+		#var avatar_data:Dictionary = data["avatar"][avatar_id]
+		#var new_avatar:Level = create_object(avatar_data["data"]["id"], avatar_data["data"]["type"])
+		#_add_object_to_parent(avatar_data["parent"], new_avatar)
 	 #for object_id in data["object"]:
 	 #var object_data ...
 func _add_object_to_parent(parent_id:int, object:Object) -> void:

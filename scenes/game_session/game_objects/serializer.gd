@@ -3,8 +3,8 @@ class_name Serializer extends Object
 var _object_properties:Dictionary
 
 func _init() -> void:
-	register_object(Level, ["name","owner"])
-	register_object(Avatar, ["new_variable"])
+	register_object(Level, [])
+	register_object(Avatar, [])
 
 func register_object(object_type:Resource, properties_list:Array[String]) -> void:
 	_object_properties[object_type] = properties_list
@@ -12,6 +12,10 @@ func register_object(object_type:Resource, properties_list:Array[String]) -> voi
 func serialize_object(object:Object) -> Dictionary:
 	var properties:Array = _object_properties[object.get_script()]
 	var serialize:Dictionary = {}
+	
+	#serialize["id"] = object.get("id")
+	#serialize["type"] = object.get("type")
+	
 	for property:String in properties:
 		var value:Variant = object.get(property)
 		if value is Object:

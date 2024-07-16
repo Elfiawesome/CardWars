@@ -8,8 +8,6 @@ var object_handler:ObjectHandler = ObjectHandler.new()
 var players:Dictionary = {}
 
 func _init() -> void:
-	var new_ser:Serializer = Serializer.new()
-	
 	Packet.game_server = self
 	packet_factory.register_packet("packet", Packet)
 	packet_factory.register_packet("player_joined", PacketPlayerJoined)
