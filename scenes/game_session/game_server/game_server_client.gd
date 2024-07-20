@@ -18,8 +18,20 @@ func _on_data_received(data:Variant, channel:int) -> void:
 		return
 	elif channel==1:
 		# Handle raw data
-		pass
+		match data[0]:
+			MSG.UPDATE_AVATAR_POSITION:
+				var avatars:Dictionary = data[1]
+				for avatar_id:int in avatars:
+					if object_handler.objects.has(avatar_id):
+						var avatar:Avatar = object_handler.objects[avatar_id]
+						avatar.position = avatars[avatar_id]
 	elif channel==2:
 		# Handle serialized packets
 		var new_packet:Packet = packet_factory.create_from_dict(data)
 		_handle_packet(new_packet)
+
+
+func update_my_avatar_position(avatar_id:int, position:Vector2) -> void:
+	var avatar:Avatar = object_handler.objects[avatar_id]
+	print("ok")
+	# FIX: TODO: NOTE: WHATEVER: HERE

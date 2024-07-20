@@ -17,6 +17,10 @@ func connect_to_server() -> void:
 	add_player(my_player_id, {"username":global.username})
 	var level:Level = object_handler.create_object(generate_object_id(), "level_home") as Level
 	object_handler.add_node(level)
+	
+	var local_packet:PacketPlayerJoinedSetup = packet_factory.create("player_joined_setup") as PacketPlayerJoinedSetup
+	local_packet.prep()
+	_handle_packet(local_packet.set_player_id(my_player_id))
 
 func client_requested_connection(waiting_client_id:int, client_id:int, userdata:Dictionary) -> void:
 	if client_id == my_player_id:
@@ -37,6 +41,9 @@ func _on_client_connected(client_id:int, userdata:Dictionary) -> void:
 		players_joined_packet.add_player(player_id, player.to_userdata())
 	send_packet(players_joined_packet, client_id)
 	players_joined_packet.free()
+	
+	var player_joined_setup_packet:PacketPlayerJoinedSetup = packet_factory.create("player_joined_setup") as PacketPlayerJoinedSetup
+	broadcast_packet(player_joined_setup_packet.set_player_id(client_id), recipients)
 	
 	var update_object_packet:Packet = packet_factory.create("update_objects") as Packet
 	update_object_packet.prep()
@@ -66,6 +73,17 @@ func _input(event:InputEvent) -> void:
 		if event.pressed && event.keycode == KEY_Q:
 			pass
 
+func _process(delta:float) -> void:
+	if game_state == GAME_STATE.WORLD:
+		var avatars:Dictionary = {}
+		for avatar_id:int in object_handler.object_grouping["avatar"]:
+			var avatar:Avatar = object_handler.objects[avatar_id]
+			avatars[avatar_id] = avatar.position
+		
+		for player_id:int in server.get_clients():
+			server.send_data(player_id, [MSG.UPDATE_AVATAR_POSITION, avatars], 1)
+
+
 func broadcast_packet(packet:Packet, recipients:Array, on_server:bool = true) -> void:
 	packet.prep()
 	for client_id:int in recipients:
@@ -77,3 +95,9 @@ func broadcast_packet(packet:Packet, recipients:Array, on_server:bool = true) ->
 func send_packet(packet:Packet, client_id:int) -> void:
 	server.send_data(client_id, packet.to_dict(),2)
 	
+
+func destroy() -> void:
+	server.free()
+	object_handler.free()
+	packet_factory.free()
+	queue_free()
